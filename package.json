@@ -1,0 +1,51 @@
+{
+  "name": "sky-env-launcher",
+  "version": "1.0.0",
+  "description": "",
+  "source": "src/index.ts",
+  "main": "dist/cjs/index.js",
+  "types": "dist/cjs/index.d.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "build": "npm-run-all clean cjs esm",
+    "clean": "rimraf dist",
+    "cjs": "tsc -p tsconfig.cjs.json",
+    "esm": "tsc -p tsconfig.esm.json",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      },
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      }
+    }
+  },
+  "keywords": [],
+  "author": "Seokkyu-Yoon",
+  "license": "ISC",
+  "devDependencies": {
+    "@swc/core": "^1.4.2",
+    "@swc/helpers": "^0.5.6",
+    "@types/node": "^20.11.21",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-promise": "^6.1.1",
+    "jest": "^29.7.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.2.5",
+    "rimraf": "^5.0.5",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
