@@ -13,6 +13,14 @@ export class AnsiBuilder {
     return ansiBuilder
   }
 
+  get Reset() {
+    return this.push(Ansi.Reset)
+  }
+
+  static get Reset() {
+    return new AnsiBuilder().Reset
+  }
+
   get Bold() {
     return this.push(Ansi.Bold)
   }
@@ -62,6 +70,10 @@ export class AnsiBuilder {
   static message(...msgs: any[]) {
     const ansiBuilder = new AnsiBuilder()
     return ansiBuilder.message(...msgs)
+  }
+
+  get Active() {
+    return this.msgs.join('')
   }
 }
 
