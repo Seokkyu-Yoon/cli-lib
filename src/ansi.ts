@@ -4,7 +4,7 @@ export class AnsiBuilder {
   private readonly msgs: any[]
 
   protected constructor(ansiBuilder?: AnsiBuilder) {
-    this.msgs = typeof ansiBuilder === 'undefined' ? [] : ansiBuilder.msgs
+    this.msgs = typeof ansiBuilder === 'undefined' ? [] : [...ansiBuilder.msgs]
   }
 
   protected push(...args: any[]) {
@@ -13,8 +13,16 @@ export class AnsiBuilder {
     return ansiBuilder
   }
 
+  get Clone() {
+    return new AnsiBuilder(this)
+  }
+
+  static get New() {
+    return new AnsiBuilder()
+  }
+
   get Reset() {
-    return this.push(Ansi.Reset)
+    return this.push(Unicode.Reset)
   }
 
   static get Reset() {
@@ -22,7 +30,7 @@ export class AnsiBuilder {
   }
 
   get Bold() {
-    return this.push(Ansi.Bold)
+    return this.push(Unicode.Bold)
   }
 
   static get Bold() {
@@ -30,7 +38,7 @@ export class AnsiBuilder {
   }
 
   get Italic() {
-    return this.push(Ansi.Italic)
+    return this.push(Unicode.Italic)
   }
 
   static get Italic() {
@@ -38,7 +46,7 @@ export class AnsiBuilder {
   }
 
   get Underline() {
-    return this.push(Ansi.Underline)
+    return this.push(Unicode.Underline)
   }
 
   static get Underline() {
@@ -46,7 +54,16 @@ export class AnsiBuilder {
   }
 
   get Fg() {
-    return new FgAnsiBuilder(this)
+    return {
+      Red: this.push(Unicode.Foreground(ColorRGB.Red.Ansi).value),
+      Green: this.push(Unicode.Foreground(ColorRGB.Green.Ansi).value),
+      Blue: this.push(Unicode.Foreground(ColorRGB.Blue.Ansi).value),
+      Pink: this.push(Unicode.Foreground(ColorRGB.Pink.Ansi).value),
+      Cyan: this.push(Unicode.Foreground(ColorRGB.Cyan.Ansi).value),
+      Yellow: this.push(Unicode.Foreground(ColorRGB.Yellow.Ansi).value),
+      White: this.push(Unicode.Foreground(ColorRGB.White.Ansi).value),
+      Gray: this.push(Unicode.Foreground(ColorRGB.Gray.Ansi).value),
+    }
   }
 
   static get Fg() {
@@ -54,7 +71,16 @@ export class AnsiBuilder {
   }
 
   get Bg() {
-    return new BgAnsiBuilder(this)
+    return {
+      Red: this.push(Unicode.Background(ColorRGB.Red.Ansi).value),
+      Green: this.push(Unicode.Background(ColorRGB.Green.Ansi).value),
+      Blue: this.push(Unicode.Background(ColorRGB.Blue.Ansi).value),
+      Pink: this.push(Unicode.Background(ColorRGB.Pink.Ansi).value),
+      Cyan: this.push(Unicode.Background(ColorRGB.Cyan.Ansi).value),
+      Yellow: this.push(Unicode.Background(ColorRGB.Yellow.Ansi).value),
+      White: this.push(Unicode.Background(ColorRGB.White.Ansi).value),
+      Gray: this.push(Unicode.Background(ColorRGB.Gray.Ansi).value),
+    }
   }
 
   static get Bg() {
@@ -62,162 +88,78 @@ export class AnsiBuilder {
   }
 
   message(...msgs: any[]) {
-    return this.push(...msgs)
-      .push(Ansi.Reset)
+    return this.Clone.push(...msgs)
+      .push(Unicode.Reset)
       .msgs.join('')
   }
 
   static message(...msgs: any[]) {
-    const ansiBuilder = new AnsiBuilder()
-    return ansiBuilder.message(...msgs)
+    return new AnsiBuilder().message(...msgs)
   }
 
   get Active() {
     return this.msgs.join('')
   }
-}
 
-class FgAnsiBuilder extends AnsiBuilder {
-  get Red() {
-    return this.push(AnsiForeground.Red)
-  }
-
-  get Green() {
-    return this.push(AnsiForeground.Green)
-  }
-
-  get Blue() {
-    return this.push(AnsiForeground.Blue)
-  }
-
-  get Pink() {
-    return this.push(AnsiForeground.Pink)
-  }
-
-  get Cyan() {
-    return this.push(AnsiForeground.Cyan)
-  }
-
-  get Yellow() {
-    return this.push(AnsiForeground.Yellow)
-  }
-
-  get White() {
-    return this.push(AnsiForeground.White)
-  }
-
-  get Gray() {
-    return this.push(AnsiForeground.fromAnsi('246').value)
+  static get Active() {
+    return new AnsiBuilder().Active
   }
 }
 
-class BgAnsiBuilder extends AnsiBuilder {
-  get Red() {
-    return this.push(AnsiBackground.Red)
-  }
-
-  get Green() {
-    return this.push(AnsiBackground.Green)
-  }
-
-  get Blue() {
-    return this.push(AnsiBackground.Blue)
-  }
-
-  get Pink() {
-    return this.push(AnsiBackground.Pink)
-  }
-
-  get Cyan() {
-    return this.push(AnsiBackground.Cyan)
-  }
-
-  get Yellow() {
-    return this.push(AnsiBackground.Yellow)
-  }
-
-  get White() {
-    return this.push(AnsiBackground.White)
-  }
-
-  get Gray() {
-    return this.push(AnsiBackground.fromAnsi('246').value)
-  }
-}
-
-class Ansi {
+export class Unicode {
   readonly value
-  protected constructor(style: string) {
-    this.value = `\u001B[${style}m`
+  protected constructor(unicode: string) {
+    this.value = unicode
   }
 
-  static Reset = new Ansi('0').value
-  static Bold = new Ansi('1').value
-  static Italic = new Ansi('3').value
-  static Underline = new Ansi('4').value
-}
-
-abstract class AnsiColor extends Ansi {
-  protected abstract colorRgb: ColorRGB
-
-  protected static rgbToAnsi(colorRgb: ColorRGB) {
-    return (
-      16 +
-      36 * Math.floor((6 * colorRgb.red) / 256) +
-      6 * Math.floor((6 * colorRgb.green) / 256) +
-      Math.floor((6 * colorRgb.blue) / 256)
-    )
-  }
-}
-
-class AnsiForeground extends AnsiColor {
-  private static readonly CODE = '38;5;'
-  protected colorRgb: ColorRGB
-
-  private constructor(colorRgb: ColorRGB) {
-    super(`${AnsiForeground.CODE}${AnsiColor.rgbToAnsi(colorRgb)}`)
-    this.colorRgb = colorRgb
+  static AnsiEscape(style: string) {
+    return new Unicode(`\u001b[${style}`)
   }
 
-  static fromRGB(colorRgb: ColorRGB) {
-    return new AnsiForeground(colorRgb)
+  static AnsiEscapeText(style: string) {
+    return this.AnsiEscape(`${style}m`)
   }
 
-  static fromAnsi(ansi: string) {
-    return new Ansi(`${AnsiForeground.CODE}${ansi}`)
+  static Foreground(style: string) {
+    return this.AnsiEscapeText(`38;5;${style}`)
   }
 
-  static Red = new AnsiForeground(ColorRGB.Red).value
-  static Green = new AnsiForeground(ColorRGB.Green).value
-  static Blue = new AnsiForeground(ColorRGB.Blue).value
-  static Pink = new AnsiForeground(ColorRGB.Pink).value
-  static Cyan = new AnsiForeground(ColorRGB.Cyan).value
-  static Yellow = new AnsiForeground(ColorRGB.Yellow).value
-  static White = new AnsiForeground(ColorRGB.White).value
-}
-
-class AnsiBackground extends AnsiColor {
-  private static readonly CODE = '48;5;'
-  protected colorRgb: ColorRGB
-
-  private constructor(colorRgb: ColorRGB) {
-    super(`${AnsiBackground.CODE}${AnsiColor.rgbToAnsi(colorRgb)}`)
-    this.colorRgb = colorRgb
+  static Background(style: string) {
+    return this.AnsiEscapeText(`48;5;${style}`)
   }
 
-  static fromRGB(colorRgb: ColorRGB): AnsiColor {
-    return new AnsiBackground(colorRgb)
+  static Reset = this.AnsiEscapeText('0').value
+  static Bold = this.AnsiEscapeText('1').value
+  static Italic = this.AnsiEscapeText('3').value
+  static Underline = this.AnsiEscapeText('4').value
+
+  static Up = this.AnsiEscape('A').value
+  static Down = this.AnsiEscape('B').value
+  static Right = this.AnsiEscape('C').value
+  static Left = this.AnsiEscape('D').value
+  static Home = this.AnsiEscape('H').value
+  static End = this.AnsiEscape('E').value
+  static Ups(n: number) {
+    return this.AnsiEscape(`${n}A`).value
   }
 
-  static fromAnsi(ansi: string) {
-    return new Ansi(`${AnsiBackground.CODE}${ansi}`)
+  static Downs(n: number) {
+    return this.AnsiEscape(`${n}B`).value
   }
 
-  static Red = new AnsiBackground(ColorRGB.Red).value
-  static Green = new AnsiBackground(ColorRGB.Green).value
-  static Blue = new AnsiBackground(ColorRGB.Blue).value
-  static Pink = new AnsiBackground(ColorRGB.Pink).value
-  static Cyan = new AnsiBackground(ColorRGB.Cyan).value
-  static Yellow = new AnsiBackground(ColorRGB.Yellow).value
-  static White = new AnsiBackground(ColorRGB.White).value
+  static Rights(n: number) {
+    return this.AnsiEscape(`${n}C`).value
+  }
+
+  static Lefts(n: number) {
+    return this.AnsiEscape(`${n}D`).value
+  }
+
+  static Enter = new Unicode('\u000d').value
+  static HideCursor = this.AnsiEscape('?25l').value
+  static ShowCursor = this.AnsiEscape('?25h').value
+  static SaveCursorPosition = this.AnsiEscape('s').value
+  static RestoreCursorPosition = this.AnsiEscape('u').value
+  static RemoveAfterCursor = this.AnsiEscape('J').value
+  static Exit = new Unicode('\u0003').value
 }

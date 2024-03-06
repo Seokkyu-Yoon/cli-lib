@@ -1,12 +1,13 @@
-import { AnsiBuilder } from './ansi'
+import { Unicode, AnsiBuilder } from './ansi'
 
 class Stdio {
-  private readonly stdin
-  private readonly stdout
+  readonly stdin
+  readonly stdout
 
   private constructor() {
     this.stdin = process.stdin
     this.stdout = process.stdout
+    this.stdin.pause()
   }
 
   print(text: string) {
@@ -18,132 +19,185 @@ class Stdio {
     return new Stdio().print(text)
   }
 
-  get Next() {
-    this.stdout.write('\n')
-    return this
+  println(text: string) {
+    return this.print(`${text}\n`)
   }
 
-  static get Next() {
-    return new Stdio().Next
+  static println(text: string) {
+    return new Stdio().println(text)
   }
 
-  async ask(text: string, inputAfterLine = false) {
-    this.stdout.write(text)
-    if (inputAfterLine) {
-      this.stdout.write('\n')
+  get HideCursor() {
+    return this.print(Unicode.HideCursor)
+  }
+
+  get ShowCursor() {
+    return this.print(Unicode.ShowCursor)
+  }
+
+  get SaveCursorPosition() {
+    return this.print(Unicode.SaveCursorPosition)
+  }
+
+  get RestoreCursorPosition() {
+    return this.print(Unicode.RestoreCursorPosition)
+  }
+
+  get RemoveAfterCursor() {
+    return this.print(Unicode.RemoveAfterCursor)
+  }
+
+  moveUp(n: number) {
+    return this.print(Unicode.Ups(n))
+  }
+
+  moveDown(n: number) {
+    return this.print(Unicode.Downs(n))
+  }
+
+  moveLeft(n: number) {
+    return this.print(Unicode.Lefts(n))
+  }
+
+  moveRight(n: number) {
+    return this.print(Unicode.Rights(n))
+  }
+
+  get Home() {
+    return this.print(Unicode.Home)
+  }
+
+  get End() {
+    return this.print(Unicode.End)
+  }
+
+  async input(ansiBuilder?: AnsiBuilder) {
+    if (typeof ansiBuilder !== 'undefined') {
+      this.print(ansiBuilder.Active)
     }
-
     return await new Promise<string>((resolve) => {
-      this.stdin.resume()
-      this.stdin.once('data', (data) => {
-        this.stdin.pause()
-        resolve(data.toString('utf-8'))
-      })
+      this.stdin
+        .once('data', (data) => {
+          this.stdin.pause()
+          this.print(AnsiBuilder.Reset.Active)
+          resolve(data.toString('utf-8'))
+        })
+        .resume()
     })
   }
 
-  static async ask(text: string, inputAfterLine = false) {
-    return await new Stdio().ask(text, inputAfterLine)
-  }
-
-  async askChoosable(
-    choosable: Choosable,
-    text: string,
-    inputAfterLine = false,
+  async select(
+    items: string[],
+    selectOption: {
+      idx?: number
+      vertical?: boolean
+      ansiBuilder?: AnsiBuilder
+      selectedAnsiBuilder?: AnsiBuilder
+    } = {},
   ) {
-    this.stdout.write(text)
-    if (inputAfterLine) {
-      this.stdout.write('\n')
+    const idx = typeof selectOption.idx === 'undefined' ? 0 : selectOption.idx
+    const vertical =
+      typeof selectOption.vertical === 'undefined'
+        ? false
+        : selectOption.vertical
+    const ansiBuilder =
+      typeof selectOption.ansiBuilder === 'undefined'
+        ? AnsiBuilder.New
+        : selectOption.ansiBuilder.Clone
+    const selectedAnsiBuilder =
+      typeof selectOption.selectedAnsiBuilder === 'undefined'
+        ? AnsiBuilder.New
+        : selectOption.selectedAnsiBuilder.Clone
+
+    const prettyItems = []
+    for (let i = 0; i < items.length; i += 1) {
+      const item = vertical ? `${i + 1}. ${items[i]}` : items[i]
+      if (i === idx) {
+        prettyItems.push(selectedAnsiBuilder.message(item))
+        continue
+      }
+      prettyItems.push(ansiBuilder.message(item))
     }
 
-    this.stdout.write(choosable.getItems())
+    const seperator = vertical ? '\n' : ' / '
+    this.print(`${prettyItems.join(seperator)}`).HideCursor.stdin.setRawMode(
+      true,
+    )
     return await new Promise<string>((resolve) => {
-      const onData = (data: Buffer) => {
-        const key = data.toString()
-        console.log(key === '\u001b[B')
-      }
-      this.stdin.resume()
-      this.stdin.once('data', onData)
+      this.stdin
+        .once('data', (data) => {
+          const key = data.toString('utf-8')
+          if (key === Unicode.Enter) {
+            this.ShowCursor.stdin.setRawMode(false)
+            this.println('')
+            resolve(items[idx])
+            return
+          }
+
+          if (key === Unicode.Exit) {
+            this.ShowCursor.stdin.setRawMode(false)
+            return process.exit(1)
+          }
+
+          if (vertical) {
+            this.Home.moveLeft(items[items.length - 1].length)
+              .moveUp(items.length - 1)
+              .RemoveAfterCursor.stdin.pause()
+          } else {
+            this.moveLeft(
+              items.join(' / ').length,
+            ).RemoveAfterCursor.stdin.pause()
+          }
+
+          let newIdx = idx
+          if (key === Unicode.Left) {
+            newIdx = vertical ? newIdx : (items.length + idx - 1) % items.length
+          }
+          if (key === Unicode.Right) {
+            newIdx = vertical ? newIdx : (idx + 1) % items.length
+          }
+          if (key === Unicode.Up) {
+            newIdx = vertical ? (items.length + idx - 1) % items.length : newIdx
+          }
+          if (key === Unicode.Down) {
+            newIdx = vertical ? (idx + 1) % items.length : newIdx
+          }
+          resolve(
+            this.select(items, {
+              idx: newIdx,
+              vertical,
+              ansiBuilder,
+              selectedAnsiBuilder,
+            }),
+          )
+        })
+        .resume()
     })
   }
-}
 
-class Choosable {
-  private readonly items
-  private readonly mode
-  private idx = 0
-
-  static readonly MODE = {
-    VERTICAL: 'vertical',
-    HORIZONTAL: 'horizontal',
-  } as const
-
-  constructor(chooseableConfig: {
-    items: string[]
-    mode?: (typeof Choosable.MODE)[keyof typeof Choosable.MODE]
-    selectedItemAnsiBuilder: AnsiBuilder
-  }) {
-    const items = chooseableConfig.items
-    const mode =
-      typeof chooseableConfig.mode === 'undefined'
-        ? Choosable.MODE.HORIZONTAL
-        : chooseableConfig.mode
-    const selectedItemAnsiBuilder = chooseableConfig.selectedItemAnsiBuilder
-    if (items.length === 0) throw new Error('items must be longer than 0')
-    this.items = items
-    this.mode = mode
-    this.itemAnsiBuilder = selectedItemAnsiBuilder
-  }
-
-  private addIdx() {
-    this.idx = (this.idx + 1) % this.items.length
-    return this
-  }
-
-  private subIdx() {
-    this.idx = (this.items.length + this.idx - 1) % this.items.length
-    return this
-  }
-
-  onKeyUp() {
-    if (this.mode !== Choosable.MODE.VERTICAL) return this
-    return this.subIdx()
-  }
-
-  onKeyDown() {
-    if (this.mode !== Choosable.MODE.VERTICAL) return this
-    return this.addIdx()
-  }
-
-  onKeyLeft() {
-    if (this.mode !== Choosable.MODE.HORIZONTAL) return this
-    return this.subIdx()
-  }
-
-  onKeyRight() {
-    if (this.mode !== Choosable.MODE.HORIZONTAL) return this
-    return this.addIdx()
-  }
-
-  get Item() {
-    return this.items[this.idx]
-  }
-
-  getItems(seperator = ' / ') {
-    return this.items.join(seperator)
+  static async input() {
+    return await new Stdio().input()
   }
 }
 
 async function main() {
-  const answer1 = await Stdio.print(AnsiBuilder.Fg.Pink.Active)
-    .print(AnsiBuilder.message('test'))
-    .Next.ask('name: ')
-  console.log(answer1)
+  const answer = await Stdio.println(AnsiBuilder.Underline.message('hello'))
+    .print(AnsiBuilder.Fg.Red.message('test: '))
+    .input(AnsiBuilder.Fg.Yellow)
+  Stdio.println(`answer is ${answer}`)
 
-  const answer2 = await Stdio.print(
-    AnsiBuilder.Fg.Blue.message('test2'),
-  ).Next.askChoosable(new Choosable(['yes', 'no']), 'test2:')
-  console.log(answer2)
+  const answer2 = await Stdio.print('test2: ').select(['yes', 'no'], {
+    ansiBuilder: AnsiBuilder.Fg.Gray,
+    selectedAnsiBuilder: AnsiBuilder.Fg.Cyan,
+  })
+  Stdio.println(`answer2 is ${answer2}`)
+
+  const answer3 = await Stdio.println('test3').select(['yes', 'no'], {
+    vertical: true,
+    ansiBuilder: AnsiBuilder.Fg.Gray,
+    selectedAnsiBuilder: AnsiBuilder.Bg.White,
+  })
+  Stdio.println(`answer3 is ${answer3}`)
 }
 
-main().then(console.log).catch(console.error)
+main().catch(console.error)

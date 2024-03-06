@@ -27,6 +27,12 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-unsafe-argument': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/unbound-method': [
+      'error',
+      {
+        ignoreStatic: true,
+      },
+    ],
   },
   ignorePatterns: ['dist/', '.eslintrc.{js,ejs}'],
 }

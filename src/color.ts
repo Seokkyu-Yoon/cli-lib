@@ -36,13 +36,18 @@ export class Color {
 }
 
 export class ColorRGB {
-  static Red = ColorRGB.fromDecimal(255, 0, 0)
-  static Green = ColorRGB.fromDecimal(0, 255, 0)
-  static Blue = ColorRGB.fromDecimal(0, 0, 255)
-  static Pink = ColorRGB.fromDecimal(255, 0, 255)
-  static Cyan = ColorRGB.fromDecimal(0, 255, 255)
-  static Yellow = ColorRGB.fromDecimal(255, 255, 0)
-  static White = ColorRGB.fromDecimal(255, 255, 255)
+  static readonly Red = ColorRGB.fromDecimal(255, 0, 0)
+  static readonly Green = ColorRGB.fromDecimal(0, 255, 0)
+  static readonly Blue = ColorRGB.fromDecimal(0, 0, 255)
+  static readonly Pink = ColorRGB.fromDecimal(255, 0, 255)
+  static readonly Cyan = ColorRGB.fromDecimal(0, 255, 255)
+  static readonly Yellow = ColorRGB.fromDecimal(255, 255, 0)
+  static readonly White = ColorRGB.fromDecimal(255, 255, 255)
+  static readonly Gray = {
+    get Ansi() {
+      return '246'
+    },
+  }
 
   readonly red
   readonly green
@@ -77,5 +82,14 @@ export class ColorRGB {
     const green = Color.fromHex(code.slice(3, 5))
     const blue = Color.fromHex(code.slice(5))
     return new ColorRGB(red, green, blue)
+  }
+
+  get Ansi() {
+    return String(
+      16 +
+        36 * Math.floor((6 * this.red) / 256) +
+        6 * Math.floor((6 * this.green) / 256) +
+        Math.floor((6 * this.blue) / 256),
+    )
   }
 }
