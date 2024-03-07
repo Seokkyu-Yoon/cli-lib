@@ -1,7 +1,10 @@
 import { Unicode, AnsiBuilder } from './ansi'
+
 export default class Stdio {
   readonly stdin
   readonly stdout
+
+  static AnsiBuilder = AnsiBuilder.New
 
   private constructor() {
     this.stdin = process.stdin
@@ -74,7 +77,7 @@ export default class Stdio {
       this.stdin
         .once('data', (data) => {
           this.stdin.pause()
-          this.print(AnsiBuilder.Reset.Active)
+          this.print(Stdio.AnsiBuilder.Reset.Active)
           resolve(data.toString('utf-8').trim())
         })
         .resume()
@@ -101,11 +104,11 @@ export default class Stdio {
         : selectOption.vertical
     const ansiBuilder =
       typeof selectOption.ansiBuilder === 'undefined'
-        ? AnsiBuilder.New
+        ? Stdio.AnsiBuilder.Clone
         : selectOption.ansiBuilder.Clone
     const selectedAnsiBuilder =
       typeof selectOption.selectedAnsiBuilder === 'undefined'
-        ? AnsiBuilder.New
+        ? Stdio.AnsiBuilder.Clone
         : selectOption.selectedAnsiBuilder.Clone
 
     const prettyItems = []
@@ -128,13 +131,13 @@ export default class Stdio {
           this.stdin.setRawMode(false)
           const key = data.toString('utf-8')
           if (key === Unicode.Enter) {
-            this.ShowCursor.println(AnsiBuilder.Reset.Active)
+            this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active)
             resolve(items[idx])
             return
           }
 
           if (key === Unicode.Exit) {
-            this.ShowCursor.println(AnsiBuilder.Reset.Active)
+            this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active)
             return process.exit(1)
           }
 
@@ -194,11 +197,11 @@ export default class Stdio {
     const idx = typeof selectOption.idx === 'undefined' ? 0 : selectOption.idx
     const ansiBuilder =
       typeof selectOption.ansiBuilder === 'undefined'
-        ? AnsiBuilder.New
+        ? Stdio.AnsiBuilder.Clone
         : selectOption.ansiBuilder.Clone
     const selectedAnsiBuilder =
       typeof selectOption.selectedAnsiBuilder === 'undefined'
-        ? AnsiBuilder.New
+        ? Stdio.AnsiBuilder.Clone
         : selectOption.selectedAnsiBuilder.Clone
     const prettyItems = []
     for (let i = 0; i < items.length; i += 1) {
@@ -220,13 +223,13 @@ export default class Stdio {
           this.stdin.setRawMode(false)
           const key = data.toString('utf-8')
           if (key === Unicode.Enter) {
-            this.ShowCursor.println(AnsiBuilder.Reset.Active)
+            this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active)
             resolve(Array.from(idxSet).map((i) => items[i]))
             return
           }
 
           if (key === Unicode.Exit) {
-            this.ShowCursor.println(AnsiBuilder.Reset.Active)
+            this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active)
             return process.exit(1)
           }
 
@@ -263,28 +266,28 @@ if (require.main === module) {
 }
 async function main() {
   const answer = await Stdio.print(
-    AnsiBuilder.Fg.rgb(130, 0, 0).message('test: '),
-  ).input(AnsiBuilder.Fg.Yellow)
+    Stdio.AnsiBuilder.Fg.rgb(130, 0, 0).message('test: '),
+  ).input(Stdio.AnsiBuilder.Fg.Yellow)
   Stdio.println(`answer is ${answer}`).println()
 
   const answer2 = await Stdio.print('test2: ').select(['yes', 'no'], {
-    ansiBuilder: AnsiBuilder.Fg.Gray,
-    selectedAnsiBuilder: AnsiBuilder.Fg.Cyan,
+    ansiBuilder: Stdio.AnsiBuilder.Fg.Gray,
+    selectedAnsiBuilder: Stdio.AnsiBuilder.Fg.Cyan,
   })
   Stdio.println(`answer2 is ${answer2}`).println()
 
   const answer3 = await Stdio.println('test3').select(['yes', 'no'], {
     vertical: true,
-    ansiBuilder: AnsiBuilder.Fg.Gray,
-    selectedAnsiBuilder: AnsiBuilder.Bg.White,
+    ansiBuilder: Stdio.AnsiBuilder.Fg.Gray,
+    selectedAnsiBuilder: Stdio.AnsiBuilder.Bg.White,
   })
   Stdio.println(`answer3 is ${answer3}`).println()
 
   const answer4 = await Stdio.println(
     'test4 (space: select(*) / enter: finish)',
   ).multipleSelect(['c', 'c++', 'java', 'python'], {
-    ansiBuilder: AnsiBuilder.Fg.White.Italic,
-    selectedAnsiBuilder: AnsiBuilder.Fg.Blue.Bold.Underline,
+    ansiBuilder: Stdio.AnsiBuilder.Fg.White.Italic,
+    selectedAnsiBuilder: Stdio.AnsiBuilder.Fg.Blue.Bold.Underline,
   })
   Stdio.println(`answer4 are [${answer4.join(',')}]`).println()
 }
