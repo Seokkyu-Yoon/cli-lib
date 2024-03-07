@@ -1,18 +1,18 @@
 /// <reference types="node" />
 import { AnsiBuilder } from './ansi';
-export default class Stdio {
+export default class SkyCliHelper {
     readonly stdin: NodeJS.ReadStream & {
         fd: 0;
     };
     readonly stdout: NodeJS.WriteStream & {
         fd: 1;
     };
-    static AnsiBuilder: AnsiBuilder;
+    static get AnsiBuilder(): AnsiBuilder;
     private constructor();
     print(text: string): this;
-    static print(text: string): Stdio;
+    static print(text: string): SkyCliHelper;
     println(text?: string): this;
-    static println(text?: string): Stdio;
+    static println(text?: string): SkyCliHelper;
     get HideCursor(): this;
     get ShowCursor(): this;
     get SaveCursorPosition(): this;

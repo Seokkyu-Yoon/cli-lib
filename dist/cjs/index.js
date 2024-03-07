@@ -10,7 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ansi_1 = require("./ansi");
-class Stdio {
+class SkyCliHelper {
+    static get AnsiBuilder() {
+        return ansi_1.AnsiBuilder.New;
+    }
     constructor() {
         this.stdin = process.stdin;
         this.stdout = process.stdout;
@@ -21,13 +24,13 @@ class Stdio {
         return this;
     }
     static print(text) {
-        return new Stdio().print(text);
+        return new SkyCliHelper().print(text);
     }
     println(text) {
         return this.print(typeof text === 'undefined' ? '\n' : `${text}\n`);
     }
     static println(text) {
-        return new Stdio().println(text);
+        return new SkyCliHelper().println(text);
     }
     get HideCursor() {
         return this.print(ansi_1.Unicode.HideCursor);
@@ -68,7 +71,7 @@ class Stdio {
                 this.stdin
                     .once('data', (data) => {
                     this.stdin.pause();
-                    this.print(Stdio.AnsiBuilder.Reset.Active);
+                    this.print(SkyCliHelper.AnsiBuilder.Reset.Active);
                     resolve(data.toString('utf-8').trim());
                 })
                     .resume();
@@ -77,7 +80,7 @@ class Stdio {
     }
     static input(ansiBuilder) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield new Stdio().input(ansiBuilder);
+            return yield new SkyCliHelper().input(ansiBuilder);
         });
     }
     select(items, selectOption = {}) {
@@ -87,10 +90,10 @@ class Stdio {
                 ? false
                 : selectOption.vertical;
             const ansiBuilder = typeof selectOption.ansiBuilder === 'undefined'
-                ? Stdio.AnsiBuilder.Clone
+                ? SkyCliHelper.AnsiBuilder.Clone
                 : selectOption.ansiBuilder.Clone;
             const selectedAnsiBuilder = typeof selectOption.selectedAnsiBuilder === 'undefined'
-                ? Stdio.AnsiBuilder.Clone
+                ? SkyCliHelper.AnsiBuilder.Clone
                 : selectOption.selectedAnsiBuilder.Clone;
             const prettyItems = [];
             for (let i = 0; i < items.length; i += 1) {
@@ -109,12 +112,12 @@ class Stdio {
                     this.stdin.setRawMode(false);
                     const key = data.toString('utf-8');
                     if (key === ansi_1.Unicode.Enter) {
-                        this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active);
+                        this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active);
                         resolve(items[idx]);
                         return;
                     }
                     if (key === ansi_1.Unicode.Exit) {
-                        this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active);
+                        this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active);
                         return process.exit(1);
                     }
                     if (vertical) {
@@ -149,17 +152,17 @@ class Stdio {
     }
     static select(items, selectOption = {}) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield new Stdio().select(items, selectOption);
+            return yield new SkyCliHelper().select(items, selectOption);
         });
     }
     multipleSelect(items, selectOption = {}, idxSet = new Set()) {
         return __awaiter(this, void 0, void 0, function* () {
             const idx = typeof selectOption.idx === 'undefined' ? 0 : selectOption.idx;
             const ansiBuilder = typeof selectOption.ansiBuilder === 'undefined'
-                ? Stdio.AnsiBuilder.Clone
+                ? SkyCliHelper.AnsiBuilder.Clone
                 : selectOption.ansiBuilder.Clone;
             const selectedAnsiBuilder = typeof selectOption.selectedAnsiBuilder === 'undefined'
-                ? Stdio.AnsiBuilder.Clone
+                ? SkyCliHelper.AnsiBuilder.Clone
                 : selectOption.selectedAnsiBuilder.Clone;
             const prettyItems = [];
             for (let i = 0; i < items.length; i += 1) {
@@ -176,12 +179,12 @@ class Stdio {
                     this.stdin.setRawMode(false);
                     const key = data.toString('utf-8');
                     if (key === ansi_1.Unicode.Enter) {
-                        this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active);
+                        this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active);
                         resolve(Array.from(idxSet).map((i) => items[i]));
                         return;
                     }
                     if (key === ansi_1.Unicode.Exit) {
-                        this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active);
+                        this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active);
                         return process.exit(1);
                     }
                     this.moveUp(items.length - 1).Home.stdin.pause();
@@ -206,30 +209,29 @@ class Stdio {
         });
     }
 }
-Stdio.AnsiBuilder = ansi_1.AnsiBuilder.New;
-exports.default = Stdio;
+exports.default = SkyCliHelper;
 if (require.main === module) {
     main().catch(console.error);
 }
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const answer = yield Stdio.print(Stdio.AnsiBuilder.Fg.rgb(130, 0, 0).message('test: ')).input(Stdio.AnsiBuilder.Fg.Yellow);
-        Stdio.println(`answer is ${answer}`).println();
-        const answer2 = yield Stdio.print('test2: ').select(['yes', 'no'], {
-            ansiBuilder: Stdio.AnsiBuilder.Fg.Gray,
-            selectedAnsiBuilder: Stdio.AnsiBuilder.Fg.Cyan,
+        const answer = yield SkyCliHelper.print(SkyCliHelper.AnsiBuilder.Fg.rgb(130, 0, 0).message('test: ')).input(SkyCliHelper.AnsiBuilder.Fg.Yellow);
+        SkyCliHelper.println(`answer is ${answer}`).println();
+        const answer2 = yield SkyCliHelper.print('test2: ').select(['yes', 'no'], {
+            ansiBuilder: SkyCliHelper.AnsiBuilder.Fg.Gray,
+            selectedAnsiBuilder: SkyCliHelper.AnsiBuilder.Fg.Cyan,
         });
-        Stdio.println(`answer2 is ${answer2}`).println();
-        const answer3 = yield Stdio.println('test3').select(['yes', 'no'], {
+        SkyCliHelper.println(`answer2 is ${answer2}`).println();
+        const answer3 = yield SkyCliHelper.println('test3').select(['yes', 'no'], {
             vertical: true,
-            ansiBuilder: Stdio.AnsiBuilder.Fg.Gray,
-            selectedAnsiBuilder: Stdio.AnsiBuilder.Bg.White,
+            ansiBuilder: SkyCliHelper.AnsiBuilder.Fg.Gray,
+            selectedAnsiBuilder: SkyCliHelper.AnsiBuilder.Bg.White,
         });
-        Stdio.println(`answer3 is ${answer3}`).println();
-        const answer4 = yield Stdio.println('test4 (space: select(*) / enter: finish)').multipleSelect(['c', 'c++', 'java', 'python'], {
-            ansiBuilder: Stdio.AnsiBuilder.Fg.White.Italic,
-            selectedAnsiBuilder: Stdio.AnsiBuilder.Fg.Blue.Bold.Underline,
+        SkyCliHelper.println(`answer3 is ${answer3}`).println();
+        const answer4 = yield SkyCliHelper.println('test4 (space: select(*) / enter: finish)').multipleSelect(['c', 'c++', 'java', 'python'], {
+            ansiBuilder: SkyCliHelper.AnsiBuilder.Fg.White.Italic,
+            selectedAnsiBuilder: SkyCliHelper.AnsiBuilder.Fg.Blue.Bold.Underline,
         });
-        Stdio.println(`answer4 are [${answer4.join(',')}]`).println();
+        SkyCliHelper.println(`answer4 are [${answer4.join(',')}]`).println();
     });
 }
