@@ -1,159 +1,137 @@
+var _a;
 import { ColorRGB } from './color';
 export class AnsiBuilder {
     constructor(ansiBuilder) {
-        this.msgs = typeof ansiBuilder === 'undefined' ? [] : ansiBuilder.msgs;
+        this.msgs = typeof ansiBuilder === 'undefined' ? [] : [...ansiBuilder.msgs];
     }
     push(...args) {
         const ansiBuilder = new AnsiBuilder(this);
         ansiBuilder.msgs.push(...args);
         return ansiBuilder;
     }
+    get Clone() {
+        return new AnsiBuilder(this);
+    }
+    static get New() {
+        return new AnsiBuilder();
+    }
+    get Reset() {
+        return this.push(Unicode.Reset);
+    }
+    static get Reset() {
+        return new AnsiBuilder().Reset;
+    }
     get Bold() {
-        return this.push(Ansi.Bold);
+        return this.push(Unicode.Bold);
     }
     static get Bold() {
         return new AnsiBuilder().Bold;
     }
     get Italic() {
-        return this.push(Ansi.Italic);
+        return this.push(Unicode.Italic);
     }
     static get Italic() {
         return new AnsiBuilder().Italic;
     }
     get Underline() {
-        return this.push(Ansi.Underline);
+        return this.push(Unicode.Underline);
     }
     static get Underline() {
         return new AnsiBuilder().Underline;
     }
     get Fg() {
-        return new FgAnsiBuilder(this);
+        return {
+            Red: this.push(Unicode.Foreground(ColorRGB.Red.Ansi).value),
+            Green: this.push(Unicode.Foreground(ColorRGB.Green.Ansi).value),
+            Blue: this.push(Unicode.Foreground(ColorRGB.Blue.Ansi).value),
+            Pink: this.push(Unicode.Foreground(ColorRGB.Pink.Ansi).value),
+            Cyan: this.push(Unicode.Foreground(ColorRGB.Cyan.Ansi).value),
+            Yellow: this.push(Unicode.Foreground(ColorRGB.Yellow.Ansi).value),
+            White: this.push(Unicode.Foreground(ColorRGB.White.Ansi).value),
+            Gray: this.push(Unicode.Foreground(ColorRGB.Gray.Ansi).value),
+            rgb: (red, green, blue) => this.push(Unicode.Foreground(ColorRGB.fromDecimal(red, green, blue).Ansi).value),
+            hex: (hex) => this.push(Unicode.Foreground(ColorRGB.fromHex(hex).Ansi).value),
+        };
     }
     static get Fg() {
         return new AnsiBuilder().Fg;
     }
     get Bg() {
-        return new BgAnsiBuilder(this);
+        return {
+            Red: this.push(Unicode.Background(ColorRGB.Red.Ansi).value),
+            Green: this.push(Unicode.Background(ColorRGB.Green.Ansi).value),
+            Blue: this.push(Unicode.Background(ColorRGB.Blue.Ansi).value),
+            Pink: this.push(Unicode.Background(ColorRGB.Pink.Ansi).value),
+            Cyan: this.push(Unicode.Background(ColorRGB.Cyan.Ansi).value),
+            Yellow: this.push(Unicode.Background(ColorRGB.Yellow.Ansi).value),
+            White: this.push(Unicode.Background(ColorRGB.White.Ansi).value),
+            Gray: this.push(Unicode.Background(ColorRGB.Gray.Ansi).value),
+            rgb: (red, green, blue) => this.push(Unicode.Background(ColorRGB.fromDecimal(red, green, blue).Ansi).value),
+            hex: (hex) => this.push(Unicode.Background(ColorRGB.fromHex(hex).Ansi).value),
+        };
     }
     static get Bg() {
         return new AnsiBuilder().Bg;
     }
     message(...msgs) {
-        return this.push(...msgs)
-            .push(Ansi.Reset)
+        return this.Clone.push(...msgs)
+            .push(Unicode.Reset)
             .msgs.join('');
     }
     static message(...msgs) {
-        const ansiBuilder = new AnsiBuilder();
-        return ansiBuilder.message(...msgs);
+        return new AnsiBuilder().message(...msgs);
+    }
+    get Active() {
+        return this.msgs.join('');
+    }
+    static get Active() {
+        return new AnsiBuilder().Active;
     }
 }
-class FgAnsiBuilder extends AnsiBuilder {
-    get Red() {
-        return this.push(AnsiForeground.Red);
+export class Unicode {
+    constructor(unicode) {
+        this.value = unicode;
     }
-    get Green() {
-        return this.push(AnsiForeground.Green);
+    static AnsiEscape(style) {
+        return new _a(`\u001b[${style}`);
     }
-    get Blue() {
-        return this.push(AnsiForeground.Blue);
+    static AnsiEscapeText(style) {
+        return this.AnsiEscape(`${style}m`);
     }
-    get Pink() {
-        return this.push(AnsiForeground.Pink);
+    static Foreground(style) {
+        return this.AnsiEscapeText(`38;5;${style}`);
     }
-    get Cyan() {
-        return this.push(AnsiForeground.Cyan);
+    static Background(style) {
+        return this.AnsiEscapeText(`48;5;${style}`);
     }
-    get Yellow() {
-        return this.push(AnsiForeground.Yellow);
+    static Ups(n) {
+        return n < 2 ? this.Up : this.AnsiEscape(`${n}A`).value;
     }
-    get White() {
-        return this.push(AnsiForeground.White);
+    static Downs(n) {
+        return n < 2 ? this.Down : this.AnsiEscape(`${n}B`).value;
     }
-    get Gray() {
-        return this.push(AnsiForeground.fromAnsi('246').value);
+    static Rights(n) {
+        return n < 2 ? this.Right : this.AnsiEscape(`${n}C`).value;
     }
-}
-class BgAnsiBuilder extends AnsiBuilder {
-    get Red() {
-        return this.push(AnsiBackground.Red);
-    }
-    get Green() {
-        return this.push(AnsiBackground.Green);
-    }
-    get Blue() {
-        return this.push(AnsiBackground.Blue);
-    }
-    get Pink() {
-        return this.push(AnsiBackground.Pink);
-    }
-    get Cyan() {
-        return this.push(AnsiBackground.Cyan);
-    }
-    get Yellow() {
-        return this.push(AnsiBackground.Yellow);
-    }
-    get White() {
-        return this.push(AnsiBackground.White);
-    }
-    get Gray() {
-        return this.push(AnsiBackground.fromAnsi('246').value);
+    static Lefts(n) {
+        return n < 2 ? this.Left : this.AnsiEscape(`${n}D`).value;
     }
 }
-class Ansi {
-    constructor(style) {
-        this.value = `\u001B[${style}m`;
-    }
-}
-Ansi.Reset = new Ansi('0').value;
-Ansi.Bold = new Ansi('1').value;
-Ansi.Italic = new Ansi('3').value;
-Ansi.Underline = new Ansi('4').value;
-class AnsiColor extends Ansi {
-    static rgbToAnsi(colorRgb) {
-        return (16 +
-            36 * Math.floor((6 * colorRgb.red) / 256) +
-            6 * Math.floor((6 * colorRgb.green) / 256) +
-            Math.floor((6 * colorRgb.blue) / 256));
-    }
-}
-class AnsiForeground extends AnsiColor {
-    constructor(colorRgb) {
-        super(`${AnsiForeground.CODE}${AnsiColor.rgbToAnsi(colorRgb)}`);
-        this.colorRgb = colorRgb;
-    }
-    static fromRGB(colorRgb) {
-        return new AnsiForeground(colorRgb);
-    }
-    static fromAnsi(ansi) {
-        return new Ansi(`${AnsiForeground.CODE}${ansi}`);
-    }
-}
-AnsiForeground.CODE = '38;5;';
-AnsiForeground.Red = new AnsiForeground(ColorRGB.Red).value;
-AnsiForeground.Green = new AnsiForeground(ColorRGB.Green).value;
-AnsiForeground.Blue = new AnsiForeground(ColorRGB.Blue).value;
-AnsiForeground.Pink = new AnsiForeground(ColorRGB.Pink).value;
-AnsiForeground.Cyan = new AnsiForeground(ColorRGB.Cyan).value;
-AnsiForeground.Yellow = new AnsiForeground(ColorRGB.Yellow).value;
-AnsiForeground.White = new AnsiForeground(ColorRGB.White).value;
-class AnsiBackground extends AnsiColor {
-    constructor(colorRgb) {
-        super(`${AnsiBackground.CODE}${AnsiColor.rgbToAnsi(colorRgb)}`);
-        this.colorRgb = colorRgb;
-    }
-    static fromRGB(colorRgb) {
-        return new AnsiBackground(colorRgb);
-    }
-    static fromAnsi(ansi) {
-        return new Ansi(`${AnsiBackground.CODE}${ansi}`);
-    }
-}
-AnsiBackground.CODE = '48;5;';
-AnsiBackground.Red = new AnsiBackground(ColorRGB.Red).value;
-AnsiBackground.Green = new AnsiBackground(ColorRGB.Green).value;
-AnsiBackground.Blue = new AnsiBackground(ColorRGB.Blue).value;
-AnsiBackground.Pink = new AnsiBackground(ColorRGB.Pink).value;
-AnsiBackground.Cyan = new AnsiBackground(ColorRGB.Cyan).value;
-AnsiBackground.Yellow = new AnsiBackground(ColorRGB.Yellow).value;
-AnsiBackground.White = new AnsiBackground(ColorRGB.White).value;
+_a = Unicode;
+Unicode.Reset = _a.AnsiEscapeText('0').value;
+Unicode.Bold = _a.AnsiEscapeText('1').value;
+Unicode.Italic = _a.AnsiEscapeText('3').value;
+Unicode.Underline = _a.AnsiEscapeText('4').value;
+Unicode.Up = _a.AnsiEscape('A').value;
+Unicode.Down = _a.AnsiEscape('B').value;
+Unicode.Right = _a.AnsiEscape('C').value;
+Unicode.Left = _a.AnsiEscape('D').value;
+Unicode.Home = _a.AnsiEscape('G').value;
+Unicode.Enter = new _a('\u000d').value;
+Unicode.Space = new _a('\u0020').value;
+Unicode.HideCursor = _a.AnsiEscape('?25l').value;
+Unicode.ShowCursor = _a.AnsiEscape('?25h').value;
+Unicode.SaveCursorPosition = _a.AnsiEscape('s').value;
+Unicode.RestoreCursorPosition = _a.AnsiEscape('u').value;
+Unicode.RemoveAfterCursor = _a.AnsiEscape('J').value;
+Unicode.Exit = new _a('\u0003').value;

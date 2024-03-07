@@ -63,6 +63,12 @@ export class AnsiBuilder {
       Yellow: this.push(Unicode.Foreground(ColorRGB.Yellow.Ansi).value),
       White: this.push(Unicode.Foreground(ColorRGB.White.Ansi).value),
       Gray: this.push(Unicode.Foreground(ColorRGB.Gray.Ansi).value),
+      rgb: (red: number, green: number, blue: number) =>
+        this.push(
+          Unicode.Foreground(ColorRGB.fromDecimal(red, green, blue).Ansi).value,
+        ),
+      hex: (hex: string) =>
+        this.push(Unicode.Foreground(ColorRGB.fromHex(hex).Ansi).value),
     }
   }
 
@@ -80,6 +86,12 @@ export class AnsiBuilder {
       Yellow: this.push(Unicode.Background(ColorRGB.Yellow.Ansi).value),
       White: this.push(Unicode.Background(ColorRGB.White.Ansi).value),
       Gray: this.push(Unicode.Background(ColorRGB.Gray.Ansi).value),
+      rgb: (red: number, green: number, blue: number) =>
+        this.push(
+          Unicode.Background(ColorRGB.fromDecimal(red, green, blue).Ansi).value,
+        ),
+      hex: (hex: string) =>
+        this.push(Unicode.Background(ColorRGB.fromHex(hex).Ansi).value),
     }
   }
 
@@ -137,25 +149,25 @@ export class Unicode {
   static Down = this.AnsiEscape('B').value
   static Right = this.AnsiEscape('C').value
   static Left = this.AnsiEscape('D').value
-  static Home = this.AnsiEscape('H').value
-  static End = this.AnsiEscape('E').value
+  static Home = this.AnsiEscape('G').value
   static Ups(n: number) {
-    return this.AnsiEscape(`${n}A`).value
+    return n < 2 ? this.Up : this.AnsiEscape(`${n}A`).value
   }
 
   static Downs(n: number) {
-    return this.AnsiEscape(`${n}B`).value
+    return n < 2 ? this.Down : this.AnsiEscape(`${n}B`).value
   }
 
   static Rights(n: number) {
-    return this.AnsiEscape(`${n}C`).value
+    return n < 2 ? this.Right : this.AnsiEscape(`${n}C`).value
   }
 
   static Lefts(n: number) {
-    return this.AnsiEscape(`${n}D`).value
+    return n < 2 ? this.Left : this.AnsiEscape(`${n}D`).value
   }
 
   static Enter = new Unicode('\u000d').value
+  static Space = new Unicode('\u0020').value
   static HideCursor = this.AnsiEscape('?25l').value
   static ShowCursor = this.AnsiEscape('?25h').value
   static SaveCursorPosition = this.AnsiEscape('s').value

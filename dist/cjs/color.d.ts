@@ -9,13 +9,16 @@ export declare class Color {
     static fromHex(value: string): Color;
 }
 export declare class ColorRGB {
-    static Red: ColorRGB;
-    static Green: ColorRGB;
-    static Blue: ColorRGB;
-    static Pink: ColorRGB;
-    static Cyan: ColorRGB;
-    static Yellow: ColorRGB;
-    static White: ColorRGB;
+    static readonly Red: ColorRGB;
+    static readonly Green: ColorRGB;
+    static readonly Blue: ColorRGB;
+    static readonly Pink: ColorRGB;
+    static readonly Cyan: ColorRGB;
+    static readonly Yellow: ColorRGB;
+    static readonly White: ColorRGB;
+    static readonly Gray: {
+        readonly Ansi: string;
+    };
     readonly red: number;
     readonly green: number;
     readonly blue: number;
@@ -23,5 +26,6 @@ export declare class ColorRGB {
     private constructor();
     static fromDecimal(red: number, green: number, blue: number): ColorRGB;
     static fromHex(code: string): ColorRGB;
+    get Ansi(): string;
 }
 //# sourceMappingURL=color.d.ts.map

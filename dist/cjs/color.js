@@ -58,6 +58,12 @@ class ColorRGB {
         const blue = Color.fromHex(code.slice(5));
         return new ColorRGB(red, green, blue);
     }
+    get Ansi() {
+        return String(16 +
+            36 * Math.floor((6 * this.red) / 256) +
+            6 * Math.floor((6 * this.green) / 256) +
+            Math.floor((6 * this.blue) / 256));
+    }
 }
 exports.ColorRGB = ColorRGB;
 ColorRGB.Red = ColorRGB.fromDecimal(255, 0, 0);
@@ -67,3 +73,8 @@ ColorRGB.Pink = ColorRGB.fromDecimal(255, 0, 255);
 ColorRGB.Cyan = ColorRGB.fromDecimal(0, 255, 255);
 ColorRGB.Yellow = ColorRGB.fromDecimal(255, 255, 0);
 ColorRGB.White = ColorRGB.fromDecimal(255, 255, 255);
+ColorRGB.Gray = {
+    get Ansi() {
+        return '246';
+    },
+};

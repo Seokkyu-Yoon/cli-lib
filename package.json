@@ -1,7 +1,7 @@
 {
-  "name": "sky-env-launcher",
+  "name": "sky-cli-helper",
   "version": "1.0.0",
-  "description": "",
+  "description": "This is can use prompt easy and colorful",
   "source": "src/index.ts",
   "main": "dist/cjs/index.js",
   "types": "dist/cjs/index.d.ts",
