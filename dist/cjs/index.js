@@ -68,7 +68,7 @@ class Stdio {
                 this.stdin
                     .once('data', (data) => {
                     this.stdin.pause();
-                    this.print(ansi_1.AnsiBuilder.Reset.Active);
+                    this.print(Stdio.AnsiBuilder.Reset.Active);
                     resolve(data.toString('utf-8').trim());
                 })
                     .resume();
@@ -87,10 +87,10 @@ class Stdio {
                 ? false
                 : selectOption.vertical;
             const ansiBuilder = typeof selectOption.ansiBuilder === 'undefined'
-                ? ansi_1.AnsiBuilder.New
+                ? Stdio.AnsiBuilder.Clone
                 : selectOption.ansiBuilder.Clone;
             const selectedAnsiBuilder = typeof selectOption.selectedAnsiBuilder === 'undefined'
-                ? ansi_1.AnsiBuilder.New
+                ? Stdio.AnsiBuilder.Clone
                 : selectOption.selectedAnsiBuilder.Clone;
             const prettyItems = [];
             for (let i = 0; i < items.length; i += 1) {
@@ -109,12 +109,12 @@ class Stdio {
                     this.stdin.setRawMode(false);
                     const key = data.toString('utf-8');
                     if (key === ansi_1.Unicode.Enter) {
-                        this.ShowCursor.println(ansi_1.AnsiBuilder.Reset.Active);
+                        this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active);
                         resolve(items[idx]);
                         return;
                     }
                     if (key === ansi_1.Unicode.Exit) {
-                        this.ShowCursor.println(ansi_1.AnsiBuilder.Reset.Active);
+                        this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active);
                         return process.exit(1);
                     }
                     if (vertical) {
@@ -156,10 +156,10 @@ class Stdio {
         return __awaiter(this, void 0, void 0, function* () {
             const idx = typeof selectOption.idx === 'undefined' ? 0 : selectOption.idx;
             const ansiBuilder = typeof selectOption.ansiBuilder === 'undefined'
-                ? ansi_1.AnsiBuilder.New
+                ? Stdio.AnsiBuilder.Clone
                 : selectOption.ansiBuilder.Clone;
             const selectedAnsiBuilder = typeof selectOption.selectedAnsiBuilder === 'undefined'
-                ? ansi_1.AnsiBuilder.New
+                ? Stdio.AnsiBuilder.Clone
                 : selectOption.selectedAnsiBuilder.Clone;
             const prettyItems = [];
             for (let i = 0; i < items.length; i += 1) {
@@ -176,12 +176,12 @@ class Stdio {
                     this.stdin.setRawMode(false);
                     const key = data.toString('utf-8');
                     if (key === ansi_1.Unicode.Enter) {
-                        this.ShowCursor.println(ansi_1.AnsiBuilder.Reset.Active);
+                        this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active);
                         resolve(Array.from(idxSet).map((i) => items[i]));
                         return;
                     }
                     if (key === ansi_1.Unicode.Exit) {
-                        this.ShowCursor.println(ansi_1.AnsiBuilder.Reset.Active);
+                        this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active);
                         return process.exit(1);
                     }
                     this.moveUp(items.length - 1).Home.stdin.pause();
@@ -206,28 +206,29 @@ class Stdio {
         });
     }
 }
+Stdio.AnsiBuilder = ansi_1.AnsiBuilder.New;
 exports.default = Stdio;
 if (require.main === module) {
     main().catch(console.error);
 }
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const answer = yield Stdio.print(ansi_1.AnsiBuilder.Fg.rgb(130, 0, 0).message('test: ')).input(ansi_1.AnsiBuilder.Fg.Yellow);
+        const answer = yield Stdio.print(Stdio.AnsiBuilder.Fg.rgb(130, 0, 0).message('test: ')).input(Stdio.AnsiBuilder.Fg.Yellow);
         Stdio.println(`answer is ${answer}`).println();
         const answer2 = yield Stdio.print('test2: ').select(['yes', 'no'], {
-            ansiBuilder: ansi_1.AnsiBuilder.Fg.Gray,
-            selectedAnsiBuilder: ansi_1.AnsiBuilder.Fg.Cyan,
+            ansiBuilder: Stdio.AnsiBuilder.Fg.Gray,
+            selectedAnsiBuilder: Stdio.AnsiBuilder.Fg.Cyan,
         });
         Stdio.println(`answer2 is ${answer2}`).println();
         const answer3 = yield Stdio.println('test3').select(['yes', 'no'], {
             vertical: true,
-            ansiBuilder: ansi_1.AnsiBuilder.Fg.Gray,
-            selectedAnsiBuilder: ansi_1.AnsiBuilder.Bg.White,
+            ansiBuilder: Stdio.AnsiBuilder.Fg.Gray,
+            selectedAnsiBuilder: Stdio.AnsiBuilder.Bg.White,
         });
         Stdio.println(`answer3 is ${answer3}`).println();
         const answer4 = yield Stdio.println('test4 (space: select(*) / enter: finish)').multipleSelect(['c', 'c++', 'java', 'python'], {
-            ansiBuilder: ansi_1.AnsiBuilder.Fg.White.Italic,
-            selectedAnsiBuilder: ansi_1.AnsiBuilder.Fg.Blue.Bold.Underline,
+            ansiBuilder: Stdio.AnsiBuilder.Fg.White.Italic,
+            selectedAnsiBuilder: Stdio.AnsiBuilder.Fg.Blue.Bold.Underline,
         });
         Stdio.println(`answer4 are [${answer4.join(',')}]`).println();
     });

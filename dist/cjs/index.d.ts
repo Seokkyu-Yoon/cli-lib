@@ -7,6 +7,7 @@ export default class Stdio {
     readonly stdout: NodeJS.WriteStream & {
         fd: 1;
     };
+    static AnsiBuilder: AnsiBuilder;
     private constructor();
     print(text: string): this;
     static print(text: string): Stdio;
