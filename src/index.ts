@@ -1,10 +1,12 @@
 import { Unicode, AnsiBuilder } from './ansi'
 
-export default class Stdio {
+export default class SkyCliHelper {
   readonly stdin
   readonly stdout
 
-  static AnsiBuilder = AnsiBuilder.New
+  static get AnsiBuilder() {
+    return AnsiBuilder.New
+  }
 
   private constructor() {
     this.stdin = process.stdin
@@ -18,7 +20,7 @@ export default class Stdio {
   }
 
   static print(text: string) {
-    return new Stdio().print(text)
+    return new SkyCliHelper().print(text)
   }
 
   println(text?: string) {
@@ -26,7 +28,7 @@ export default class Stdio {
   }
 
   static println(text?: string) {
-    return new Stdio().println(text)
+    return new SkyCliHelper().println(text)
   }
 
   get HideCursor() {
@@ -77,7 +79,7 @@ export default class Stdio {
       this.stdin
         .once('data', (data) => {
           this.stdin.pause()
-          this.print(Stdio.AnsiBuilder.Reset.Active)
+          this.print(SkyCliHelper.AnsiBuilder.Reset.Active)
           resolve(data.toString('utf-8').trim())
         })
         .resume()
@@ -85,7 +87,7 @@ export default class Stdio {
   }
 
   static async input(ansiBuilder?: AnsiBuilder) {
-    return await new Stdio().input(ansiBuilder)
+    return await new SkyCliHelper().input(ansiBuilder)
   }
 
   async select(
@@ -104,11 +106,11 @@ export default class Stdio {
         : selectOption.vertical
     const ansiBuilder =
       typeof selectOption.ansiBuilder === 'undefined'
-        ? Stdio.AnsiBuilder.Clone
+        ? SkyCliHelper.AnsiBuilder.Clone
         : selectOption.ansiBuilder.Clone
     const selectedAnsiBuilder =
       typeof selectOption.selectedAnsiBuilder === 'undefined'
-        ? Stdio.AnsiBuilder.Clone
+        ? SkyCliHelper.AnsiBuilder.Clone
         : selectOption.selectedAnsiBuilder.Clone
 
     const prettyItems = []
@@ -131,13 +133,13 @@ export default class Stdio {
           this.stdin.setRawMode(false)
           const key = data.toString('utf-8')
           if (key === Unicode.Enter) {
-            this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active)
+            this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active)
             resolve(items[idx])
             return
           }
 
           if (key === Unicode.Exit) {
-            this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active)
+            this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active)
             return process.exit(1)
           }
 
@@ -182,7 +184,7 @@ export default class Stdio {
       selectedAnsiBuilder?: AnsiBuilder
     } = {},
   ) {
-    return await new Stdio().select(items, selectOption)
+    return await new SkyCliHelper().select(items, selectOption)
   }
 
   async multipleSelect(
@@ -197,11 +199,11 @@ export default class Stdio {
     const idx = typeof selectOption.idx === 'undefined' ? 0 : selectOption.idx
     const ansiBuilder =
       typeof selectOption.ansiBuilder === 'undefined'
-        ? Stdio.AnsiBuilder.Clone
+        ? SkyCliHelper.AnsiBuilder.Clone
         : selectOption.ansiBuilder.Clone
     const selectedAnsiBuilder =
       typeof selectOption.selectedAnsiBuilder === 'undefined'
-        ? Stdio.AnsiBuilder.Clone
+        ? SkyCliHelper.AnsiBuilder.Clone
         : selectOption.selectedAnsiBuilder.Clone
     const prettyItems = []
     for (let i = 0; i < items.length; i += 1) {
@@ -223,13 +225,13 @@ export default class Stdio {
           this.stdin.setRawMode(false)
           const key = data.toString('utf-8')
           if (key === Unicode.Enter) {
-            this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active)
+            this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active)
             resolve(Array.from(idxSet).map((i) => items[i]))
             return
           }
 
           if (key === Unicode.Exit) {
-            this.ShowCursor.println(Stdio.AnsiBuilder.Reset.Active)
+            this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active)
             return process.exit(1)
           }
 
@@ -265,29 +267,29 @@ if (require.main === module) {
   main().catch(console.error)
 }
 async function main() {
-  const answer = await Stdio.print(
-    Stdio.AnsiBuilder.Fg.rgb(130, 0, 0).message('test: '),
-  ).input(Stdio.AnsiBuilder.Fg.Yellow)
-  Stdio.println(`answer is ${answer}`).println()
+  const answer = await SkyCliHelper.print(
+    SkyCliHelper.AnsiBuilder.Fg.rgb(130, 0, 0).message('test: '),
+  ).input(SkyCliHelper.AnsiBuilder.Fg.Yellow)
+  SkyCliHelper.println(`answer is ${answer}`).println()
 
-  const answer2 = await Stdio.print('test2: ').select(['yes', 'no'], {
-    ansiBuilder: Stdio.AnsiBuilder.Fg.Gray,
-    selectedAnsiBuilder: Stdio.AnsiBuilder.Fg.Cyan,
+  const answer2 = await SkyCliHelper.print('test2: ').select(['yes', 'no'], {
+    ansiBuilder: SkyCliHelper.AnsiBuilder.Fg.Gray,
+    selectedAnsiBuilder: SkyCliHelper.AnsiBuilder.Fg.Cyan,
   })
-  Stdio.println(`answer2 is ${answer2}`).println()
+  SkyCliHelper.println(`answer2 is ${answer2}`).println()
 
-  const answer3 = await Stdio.println('test3').select(['yes', 'no'], {
+  const answer3 = await SkyCliHelper.println('test3').select(['yes', 'no'], {
     vertical: true,
-    ansiBuilder: Stdio.AnsiBuilder.Fg.Gray,
-    selectedAnsiBuilder: Stdio.AnsiBuilder.Bg.White,
+    ansiBuilder: SkyCliHelper.AnsiBuilder.Fg.Gray,
+    selectedAnsiBuilder: SkyCliHelper.AnsiBuilder.Bg.White,
   })
-  Stdio.println(`answer3 is ${answer3}`).println()
+  SkyCliHelper.println(`answer3 is ${answer3}`).println()
 
-  const answer4 = await Stdio.println(
+  const answer4 = await SkyCliHelper.println(
     'test4 (space: select(*) / enter: finish)',
   ).multipleSelect(['c', 'c++', 'java', 'python'], {
-    ansiBuilder: Stdio.AnsiBuilder.Fg.White.Italic,
-    selectedAnsiBuilder: Stdio.AnsiBuilder.Fg.Blue.Bold.Underline,
+    ansiBuilder: SkyCliHelper.AnsiBuilder.Fg.White.Italic,
+    selectedAnsiBuilder: SkyCliHelper.AnsiBuilder.Fg.Blue.Bold.Underline,
   })
-  Stdio.println(`answer4 are [${answer4.join(',')}]`).println()
+  SkyCliHelper.println(`answer4 are [${answer4.join(',')}]`).println()
 }
