@@ -74,9 +74,7 @@ export class AnsiBuilder {
         return new AnsiBuilder().Bg;
     }
     message(...msgs) {
-        return this.Clone.push(...msgs)
-            .push(Unicode.Reset)
-            .msgs.join('');
+        return [...this.msgs, ...msgs, Unicode.Reset].join('');
     }
     static message(...msgs) {
         return new AnsiBuilder().message(...msgs);

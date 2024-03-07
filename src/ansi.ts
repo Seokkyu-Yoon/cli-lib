@@ -100,9 +100,7 @@ export class AnsiBuilder {
   }
 
   message(...msgs: any[]) {
-    return this.Clone.push(...msgs)
-      .push(Unicode.Reset)
-      .msgs.join('')
+    return [...this.msgs, ...msgs, Unicode.Reset].join('')
   }
 
   static message(...msgs: any[]) {

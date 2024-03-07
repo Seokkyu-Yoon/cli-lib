@@ -90,11 +90,11 @@ class SkyCliHelper {
                 ? false
                 : selectOption.vertical;
             const ansiBuilder = typeof selectOption.ansiBuilder === 'undefined'
-                ? SkyCliHelper.AnsiBuilder.Clone
-                : selectOption.ansiBuilder.Clone;
+                ? SkyCliHelper.AnsiBuilder
+                : selectOption.ansiBuilder;
             const selectedAnsiBuilder = typeof selectOption.selectedAnsiBuilder === 'undefined'
-                ? SkyCliHelper.AnsiBuilder.Clone
-                : selectOption.selectedAnsiBuilder.Clone;
+                ? SkyCliHelper.AnsiBuilder
+                : selectOption.selectedAnsiBuilder;
             const prettyItems = [];
             for (let i = 0; i < items.length; i += 1) {
                 const item = vertical ? `${i + 1}. ${items[i]}` : items[i];
@@ -159,11 +159,11 @@ class SkyCliHelper {
         return __awaiter(this, void 0, void 0, function* () {
             const idx = typeof selectOption.idx === 'undefined' ? 0 : selectOption.idx;
             const ansiBuilder = typeof selectOption.ansiBuilder === 'undefined'
-                ? SkyCliHelper.AnsiBuilder.Clone
-                : selectOption.ansiBuilder.Clone;
+                ? SkyCliHelper.AnsiBuilder
+                : selectOption.ansiBuilder;
             const selectedAnsiBuilder = typeof selectOption.selectedAnsiBuilder === 'undefined'
-                ? SkyCliHelper.AnsiBuilder.Clone
-                : selectOption.selectedAnsiBuilder.Clone;
+                ? SkyCliHelper.AnsiBuilder
+                : selectOption.selectedAnsiBuilder;
             const prettyItems = [];
             for (let i = 0; i < items.length; i += 1) {
                 const item = [idxSet.has(i) ? '(*)' : '( )', items[i]].join(' ');
