@@ -1,6 +1,6 @@
 {
   "name": "sky-cli-helper",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "This is can use prompt easy and colorful",
   "source": "src/index.ts",
   "main": "dist/cjs/index.js",
@@ -28,6 +28,10 @@
   "keywords": [],
   "author": "Seokkyu-Yoon",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Seokkyu-Yoon/cli-lib"
+  },
   "devDependencies": {
     "@swc/core": "^1.4.2",
     "@swc/helpers": "^0.5.6",
