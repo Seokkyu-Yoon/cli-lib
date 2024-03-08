@@ -7,6 +7,7 @@
   "types": "dist/cjs/index.d.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
+    "dev": "ts-node src/v2/index.ts",
     "build": "npm-run-all clean cjs esm",
     "clean": "rimraf dist",
     "cjs": "tsc -p tsconfig.cjs.json",

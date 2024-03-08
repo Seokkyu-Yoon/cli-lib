@@ -33,6 +33,12 @@ module.exports = {
         ignoreStatic: true,
       },
     ],
+    '@typescript-eslint/no-redeclare': [
+      'error',
+      {
+        ignoreDeclarationMerge: true,
+      },
+    ],
   },
   ignorePatterns: ['dist/', '.eslintrc.{js,ejs}'],
 }
