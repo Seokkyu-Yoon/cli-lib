@@ -7,29 +7,31 @@
 ## example code
 
 ```typescript
-const answer = await Stdio.print(
-  Stdio.AnsiBuilder.Fg.rgb(130, 0, 0).message('test: '),
-).input(Stdio.AnsiBuilder.Fg.Yellow)
-Stdio.println(`answer is ${answer}`).println()
+SkyCliHelper.Text.Bold.println('test')
 
-const answer2 = await Stdio.print('test2: ').select(['yes', 'no'], {
-  ansiBuilder: Stdio.AnsiBuilder.Fg.Gray,
-  selectedAnsiBuilder: Stdio.AnsiBuilder.Fg.Cyan,
-})
-Stdio.println(`answer2 is ${answer2}`).println()
+SkyCliHelper.Text.Foreground.Red.print('test2: ')
+const answer1 = await SkyCliHelper.input(SkyCliHelper.Text.Foreground.Yellow)
+SkyCliHelper.println()
+SkyCliHelper.Text.Italic.Text.Background.White.Text.Foreground.Pink.println(
+  answer1,
+)
 
-const answer3 = await Stdio.println('test3').select(['yes', 'no'], {
-  vertical: true,
-  ansiBuilder: Stdio.AnsiBuilder.Fg.Gray,
-  selectedAnsiBuilder: Stdio.AnsiBuilder.Bg.White,
-})
-Stdio.println(`answer3 is ${answer3}`).println()
+SkyCliHelper.Text.Foreground.Green.print('test3: ')
 
-const answer4 = await Stdio.println(
-  'test4 (space: select(*) / enter: finish)',
-).multipleSelect(['c', 'c++', 'java', 'python'], {
-  ansiBuilder: Stdio.AnsiBuilder.Fg.White.Italic,
-  selectedAnsiBuilder: Stdio.AnsiBuilder.Fg.Blue.Bold.Underline,
+const answer2 = await SkyCliHelper.select(['Yes', 'No'], {
+  selectPrinter: SkyCliHelper.Text.Foreground.Cyan.Text.Underline,
+  unselectPrinter: SkyCliHelper.Text.Foreground.Gray,
 })
-Stdio.println(`answer4 are [${answer4.join(',')}]`).println()
+SkyCliHelper.println()
+SkyCliHelper.println(answer2)
+
+SkyCliHelper.Text.Foreground.Pink.println('test4')
+const answer3 = await SkyCliHelper.multipleSelect(
+  ['java', 'nodejs', 'python'],
+  {
+    cursorPrinter: SkyCliHelper.Text.Foreground.Yellow,
+  },
+)
+SkyCliHelper.println()
+SkyCliHelper.println(`[${answer3.join(', ')}]`)
 ```
