@@ -439,7 +439,10 @@ export default class SkyCliHelper {
   }
 }
 
-main().catch(console.error)
+if (require.main === module) {
+  main().catch(console.error)
+}
+
 async function main() {
   SkyCliHelper.Text.Bold.println('test')
 

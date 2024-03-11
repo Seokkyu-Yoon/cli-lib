@@ -322,7 +322,9 @@ class SkyCliHelper {
     }
 }
 exports.default = SkyCliHelper;
-main().catch(console.error);
+if (require.main === module) {
+    main().catch(console.error);
+}
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         SkyCliHelper.Text.Bold.println('test');
