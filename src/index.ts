@@ -10,6 +10,10 @@ export default class SkyCliHelper {
     return this
   }
 
+  get Clone() {
+    return new SkyCliHelper().push(...this.memo)
+  }
+
   Text = ((ctx: SkyCliHelper) => {
     const textUnicodes = UNICODES.ANSI_ESCAPE.TEXT
     return new (class {

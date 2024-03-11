@@ -2,6 +2,7 @@ export default class SkyCliHelper {
     private readonly stdio;
     private memo;
     private push;
+    get Clone(): SkyCliHelper;
     Text: {
         readonly Reset: SkyCliHelper;
         readonly Bold: SkyCliHelper;

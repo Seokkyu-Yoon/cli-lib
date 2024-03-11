@@ -154,6 +154,9 @@ export default class SkyCliHelper {
         this.memo.push(...args);
         return this;
     }
+    get Clone() {
+        return new SkyCliHelper().push(...this.memo);
+    }
     static get Text() {
         return new SkyCliHelper().Text;
     }
