@@ -1,1 +1,0 @@
-{"version":3,"file":"number.d.ts","sourceRoot":"","sources":["../../src/number.ts"],"names":[],"mappings":"AAAA,qBAAa,gBAAgB;IAC3B,OAAO,CAAC,QAAQ,CAAC,GAAG,CAAA;IACpB,OAAO,CAAC,QAAQ,CAAC,GAAG,CAAA;gBAER,GAAG,EAAE,MAAM,EAAE,GAAG,EAAE,MAAM;IAMpC,SAAS,CAAC,KAAK,EAAE,MAAM,EAAE,KAAK,GAAE,MAAM,GAAG,KAAgB;CAU1D"}

@@ -4,4 +4,4 @@ export declare class NumberSerializer {
     constructor(min: number, max: number);
     serialize(value: number, isNaN?: number | Error): number;
 }
-//# sourceMappingURL=number.d.ts.map
+//# sourceMappingURL=number.serializer.d.ts.map

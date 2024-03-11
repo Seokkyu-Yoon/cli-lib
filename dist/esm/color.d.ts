@@ -1,31 +1,26 @@
-export declare class Color {
-    private static readonly MIN;
-    private static readonly MAX;
-    private static readonly numSerializer;
+declare class Color {
     readonly decimal: number;
     readonly hex: string;
-    private constructor();
-    static fromDecimal(value: number): Color;
-    static fromHex(value: string): Color;
+    constructor(decimal: number, hex: string);
 }
-export declare class ColorRGB {
-    static readonly Red: ColorRGB;
-    static readonly Green: ColorRGB;
-    static readonly Blue: ColorRGB;
-    static readonly Pink: ColorRGB;
-    static readonly Cyan: ColorRGB;
-    static readonly Yellow: ColorRGB;
-    static readonly White: ColorRGB;
-    static readonly Gray: {
-        readonly Ansi: string;
-    };
+export declare class Rgb {
     readonly red: number;
     readonly green: number;
     readonly blue: number;
     readonly hex: string;
-    private constructor();
-    static fromDecimal(red: number, green: number, blue: number): ColorRGB;
-    static fromHex(code: string): ColorRGB;
-    get Ansi(): string;
+    constructor(red: Color, green: Color, blue: Color);
 }
+export declare class RgbFactory {
+    private readonly colorFactory;
+    readonly red: Rgb;
+    readonly green: Rgb;
+    readonly blue: Rgb;
+    readonly pink: Rgb;
+    readonly cyan: Rgb;
+    readonly yellow: Rgb;
+    readonly white: Rgb;
+    createByDecimal(red: number, green: number, blue: number): Rgb;
+    createByHex(hex: string): Rgb;
+}
+export {};
 //# sourceMappingURL=color.d.ts.map

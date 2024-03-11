@@ -1,295 +1,467 @@
-import { Unicode, AnsiBuilder } from './ansi'
+import { Stdio } from './stdio'
+import { UNICODES } from './unicode'
 
 export default class SkyCliHelper {
-  readonly stdin
-  readonly stdout
+  private readonly stdio = Stdio.instance
+  private memo: string[] = []
 
-  static get AnsiBuilder() {
-    return AnsiBuilder.New
-  }
-
-  private constructor() {
-    this.stdin = process.stdin
-    this.stdout = process.stdout
-    this.stdin.pause()
-  }
-
-  print(text: string) {
-    this.stdout.write(text)
+  private push(...args: string[]) {
+    this.memo.push(...args)
     return this
   }
 
-  static print(text: string) {
-    return new SkyCliHelper().print(text)
+  Text = ((ctx: SkyCliHelper) => {
+    const textUnicodes = UNICODES.ANSI_ESCAPE.TEXT
+    return new (class {
+      get Reset() {
+        return ctx.push(textUnicodes.RESET)
+      }
+
+      get Bold() {
+        return ctx.push(textUnicodes.BOLD)
+      }
+
+      get Italic() {
+        return ctx.push(textUnicodes.ITALIC)
+      }
+
+      get Underline() {
+        return ctx.push(textUnicodes.UNDERLINE)
+      }
+
+      get Foreground() {
+        const foregroundUnicodes = textUnicodes.FOREGROUND
+        return new (class {
+          get Red() {
+            return ctx.push(foregroundUnicodes.RED)
+          }
+
+          get Green() {
+            return ctx.push(foregroundUnicodes.GREEN)
+          }
+
+          get Blue() {
+            return ctx.push(foregroundUnicodes.BLUE)
+          }
+
+          get Pink() {
+            return ctx.push(foregroundUnicodes.PINK)
+          }
+
+          get Cyan() {
+            return ctx.push(foregroundUnicodes.CYAN)
+          }
+
+          get Yellow() {
+            return ctx.push(foregroundUnicodes.YELLOW)
+          }
+
+          get White() {
+            return ctx.push(foregroundUnicodes.WHITE)
+          }
+
+          get Gray() {
+            return ctx.push(foregroundUnicodes.GRAY)
+          }
+
+          get Rgb() {
+            return new (class {
+              decimal(red: number, green: number, blue: number) {
+                return ctx.push(
+                  foregroundUnicodes.RGB.decimal(red, green, blue),
+                )
+              }
+
+              hex(hex: string) {
+                return ctx.push(foregroundUnicodes.RGB.hex(hex))
+              }
+            })()
+          }
+        })()
+      }
+
+      get Background() {
+        const backgroundUnicodes = textUnicodes.BACKGROUND
+        return new (class {
+          get Red() {
+            return ctx.push(backgroundUnicodes.RED)
+          }
+
+          get Green() {
+            return ctx.push(backgroundUnicodes.GREEN)
+          }
+
+          get Blue() {
+            return ctx.push(backgroundUnicodes.BLUE)
+          }
+
+          get Pink() {
+            return ctx.push(backgroundUnicodes.PINK)
+          }
+
+          get Cyan() {
+            return ctx.push(backgroundUnicodes.CYAN)
+          }
+
+          get Yellow() {
+            return ctx.push(backgroundUnicodes.YELLOW)
+          }
+
+          get White() {
+            return ctx.push(backgroundUnicodes.WHITE)
+          }
+
+          get Gray() {
+            return ctx.push(backgroundUnicodes.GRAY)
+          }
+
+          get Rgb() {
+            return new (class {
+              decimal(red: number, green: number, blue: number) {
+                return ctx.push(
+                  backgroundUnicodes.RGB.decimal(red, green, blue),
+                )
+              }
+
+              hex(hex: string) {
+                return ctx.push(backgroundUnicodes.RGB.hex(hex))
+              }
+            })()
+          }
+        })()
+      }
+    })()
+  })(this)
+
+  static get Text() {
+    return new SkyCliHelper().Text
   }
 
-  println(text?: string) {
-    return this.print(typeof text === 'undefined' ? '\n' : `${text}\n`)
+  Cursor = ((ctx: SkyCliHelper) => {
+    const cursorUnicodes = UNICODES.ANSI_ESCAPE.CURSOR
+    return new (class {
+      get Up() {
+        return ctx.push(cursorUnicodes.UP)
+      }
+
+      get Down() {
+        return ctx.push(cursorUnicodes.DOWN)
+      }
+
+      get Right() {
+        return ctx.push(cursorUnicodes.RIGHT)
+      }
+
+      get Left() {
+        return ctx.push(cursorUnicodes.LEFT)
+      }
+
+      get FirstColumn() {
+        return ctx.push(cursorUnicodes.FIRST_COLUMN)
+      }
+
+      get Hide() {
+        return ctx.push(cursorUnicodes.HIDE)
+      }
+
+      get Show() {
+        return ctx.push(cursorUnicodes.SHOW)
+      }
+
+      get RemoveAfter() {
+        return ctx.push(cursorUnicodes.REMOVE_AFTER)
+      }
+
+      ups(n: number) {
+        return ctx.push(cursorUnicodes.ups(n))
+      }
+
+      downs(n: number) {
+        return ctx.push(cursorUnicodes.downs(n))
+      }
+
+      rights(n: number) {
+        return ctx.push(cursorUnicodes.rights(n))
+      }
+
+      lefts(n: number) {
+        return ctx.push(cursorUnicodes.lefts(n))
+      }
+    })()
+  })(this)
+
+  static get Cursor() {
+    return new SkyCliHelper().Cursor
   }
 
-  static println(text?: string) {
-    return new SkyCliHelper().println(text)
+  flush() {
+    this.memo = []
+    return this
   }
 
-  get HideCursor() {
-    return this.print(Unicode.HideCursor)
+  print(...text: string[]) {
+    this.stdio.print(...this.memo, ...text, UNICODES.ANSI_ESCAPE.TEXT.RESET)
+    this.flush()
   }
 
-  get ShowCursor() {
-    return this.print(Unicode.ShowCursor)
+  static print(...text: string[]) {
+    new SkyCliHelper().print(...text)
   }
 
-  get SaveCursorPosition() {
-    return this.print(Unicode.SaveCursorPosition)
+  println(...text: string[]) {
+    this.stdio.println(...this.memo, ...text, UNICODES.ANSI_ESCAPE.TEXT.RESET)
+    this.flush()
   }
 
-  get RestoreCursorPosition() {
-    return this.print(Unicode.RestoreCursorPosition)
+  static println(...text: string[]) {
+    new SkyCliHelper().println(...text)
   }
 
-  get RemoveAfterCursor() {
-    return this.print(Unicode.RemoveAfterCursor)
-  }
-
-  moveUp(n: number) {
-    return this.print(Unicode.Ups(n))
-  }
-
-  moveDown(n: number) {
-    return this.print(Unicode.Downs(n))
-  }
-
-  moveLeft(n: number) {
-    return this.print(Unicode.Lefts(n))
-  }
-
-  moveRight(n: number) {
-    return this.print(Unicode.Rights(n))
-  }
-
-  get Home() {
-    return this.print(Unicode.Home)
-  }
-
-  async input(ansiBuilder?: AnsiBuilder) {
-    if (typeof ansiBuilder !== 'undefined') {
-      this.print(ansiBuilder.Active)
+  async input(inputPrinter?: SkyCliHelper) {
+    if (typeof inputPrinter !== 'undefined') {
+      this.stdio.print(inputPrinter.memo.join(''))
     }
-    return await new Promise<string>((resolve) => {
-      this.stdin
-        .once('data', (data) => {
-          this.stdin.pause()
-          this.print(SkyCliHelper.AnsiBuilder.Reset.Active)
-          resolve(data.toString('utf-8').trim())
-        })
-        .resume()
-    })
+    const result = await this.stdio.input()
+    this.Text.Reset.print()
+    return result
   }
 
-  static async input(ansiBuilder?: AnsiBuilder) {
-    return await new SkyCliHelper().input(ansiBuilder)
+  static async input(inputPrinter?: SkyCliHelper) {
+    return await new SkyCliHelper().input(inputPrinter)
+  }
+
+  private async _select(
+    items: string[],
+    options: {
+      idx?: number
+      vertical?: boolean
+      selectPrinter?: SkyCliHelper
+      unselectPrinter?: SkyCliHelper
+    } = {},
+  ): Promise<string> {
+    const idxOld = typeof options.idx === 'undefined' ? 0 : options.idx
+    const vertical =
+      typeof options.vertical === 'undefined' ? false : options.vertical
+    const selectPrinter =
+      typeof options.selectPrinter === 'undefined'
+        ? new SkyCliHelper()
+        : options.selectPrinter
+    const unselectPrinter =
+      typeof options.unselectPrinter === 'undefined'
+        ? new SkyCliHelper()
+        : options.unselectPrinter
+
+    const outputs = []
+    for (let i = 0; i < items.length; i += 1) {
+      const item = vertical ? `${i + 1}. ${items[i]}` : items[i]
+      outputs.push(
+        idxOld === i
+          ? `${selectPrinter.memo.join('')}${item}${UNICODES.ANSI_ESCAPE.TEXT.RESET}`
+          : `${unselectPrinter.memo.join('')}${item}${UNICODES.ANSI_ESCAPE.TEXT.RESET}`,
+      )
+    }
+    this.stdio.print(outputs.join(vertical ? '\n' : ' / '))
+
+    const { finish, idx: idxNew } = await this.stdio.select(vertical, idxOld)
+    const idx = (items.length + idxNew) % items.length
+
+    if (!finish) {
+      if (vertical) {
+        this.Cursor.ups(
+          items.length - 1,
+        ).Cursor.FirstColumn.Cursor.RemoveAfter.print()
+      } else {
+        this.Cursor.lefts(items.join(' / ').length).Cursor.RemoveAfter.print()
+      }
+      return await this._select(items, {
+        idx,
+        vertical,
+        selectPrinter,
+        unselectPrinter,
+      })
+    }
+    this.flush()
+    return items[idx]
   }
 
   async select(
     items: string[],
-    selectOption: {
+    options: {
       idx?: number
       vertical?: boolean
-      ansiBuilder?: AnsiBuilder
-      selectedAnsiBuilder?: AnsiBuilder
+      selectPrinter?: SkyCliHelper
+      unselectPrinter?: SkyCliHelper
     } = {},
-  ) {
-    const idx = typeof selectOption.idx === 'undefined' ? 0 : selectOption.idx
-    const vertical =
-      typeof selectOption.vertical === 'undefined'
-        ? false
-        : selectOption.vertical
-    const ansiBuilder =
-      typeof selectOption.ansiBuilder === 'undefined'
-        ? SkyCliHelper.AnsiBuilder
-        : selectOption.ansiBuilder
-    const selectedAnsiBuilder =
-      typeof selectOption.selectedAnsiBuilder === 'undefined'
-        ? SkyCliHelper.AnsiBuilder
-        : selectOption.selectedAnsiBuilder
-
-    const prettyItems = []
-    for (let i = 0; i < items.length; i += 1) {
-      const item = vertical ? `${i + 1}. ${items[i]}` : items[i]
-      if (i === idx) {
-        prettyItems.push(selectedAnsiBuilder.message(item))
-        continue
-      }
-      prettyItems.push(ansiBuilder.message(item))
+  ): Promise<string> {
+    const skyCliHelper = new SkyCliHelper()
+    skyCliHelper.Cursor.Hide.print()
+    try {
+      const result = await this._select(items, options)
+      return result
+    } catch (err) {
+      skyCliHelper.Text.Foreground.Red.println(
+        err instanceof Error ? err.message : String(err),
+      )
+      process.exit(1)
+    } finally {
+      skyCliHelper.Cursor.Show.print()
     }
-
-    const seperator = vertical ? '\n' : ' / '
-    this.RemoveAfterCursor.print(
-      `${prettyItems.join(seperator)}`,
-    ).HideCursor.stdin.setRawMode(true)
-    return await new Promise<string>((resolve) => {
-      this.stdin
-        .once('data', (data) => {
-          this.stdin.setRawMode(false)
-          const key = data.toString('utf-8')
-          if (key === Unicode.Enter) {
-            this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active)
-            resolve(items[idx])
-            return
-          }
-
-          if (key === Unicode.Exit) {
-            this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active)
-            return process.exit(1)
-          }
-
-          if (vertical) {
-            this.moveUp(items.length - 1).Home.stdin.pause()
-          } else {
-            this.moveLeft(items.join(' / ').length).stdin.pause()
-          }
-
-          let newIdx = idx
-          if (key === Unicode.Left) {
-            newIdx = vertical ? newIdx : (items.length + idx - 1) % items.length
-          }
-          if (key === Unicode.Right) {
-            newIdx = vertical ? newIdx : (idx + 1) % items.length
-          }
-          if (key === Unicode.Up) {
-            newIdx = vertical ? (items.length + idx - 1) % items.length : newIdx
-          }
-          if (key === Unicode.Down) {
-            newIdx = vertical ? (idx + 1) % items.length : newIdx
-          }
-          resolve(
-            this.select(items, {
-              idx: newIdx,
-              vertical,
-              ansiBuilder,
-              selectedAnsiBuilder,
-            }),
-          )
-        })
-        .resume()
-    })
   }
 
   static async select(
     items: string[],
-    selectOption: {
+    options: {
       idx?: number
       vertical?: boolean
-      ansiBuilder?: AnsiBuilder
-      selectedAnsiBuilder?: AnsiBuilder
+      selectPrinter?: SkyCliHelper
+      unselectPrinter?: SkyCliHelper
     } = {},
   ) {
-    return await new SkyCliHelper().select(items, selectOption)
+    return await new SkyCliHelper().select(items, options)
+  }
+
+  async _multipleSelect(
+    items: string[],
+    multipleSelectOption: {
+      idx?: number
+      cursorPrinter?: SkyCliHelper
+      selectPrinter?: SkyCliHelper
+      unselectPrinter?: SkyCliHelper
+    } = {},
+    idxSet = new Set<number>(),
+  ): Promise<string[]> {
+    const idxOld =
+      typeof multipleSelectOption.idx === 'undefined'
+        ? 0
+        : multipleSelectOption.idx
+    const cursorPrinter =
+      typeof multipleSelectOption.cursorPrinter === 'undefined'
+        ? new SkyCliHelper()
+        : multipleSelectOption.cursorPrinter
+    const selectPrinter =
+      typeof multipleSelectOption.selectPrinter === 'undefined'
+        ? new SkyCliHelper()
+        : multipleSelectOption.selectPrinter
+    const unselectPrinter =
+      typeof multipleSelectOption.unselectPrinter === 'undefined'
+        ? new SkyCliHelper()
+        : multipleSelectOption.unselectPrinter
+
+    const outputs = []
+    for (let i = 0; i < items.length; i += 1) {
+      const prefix = `(${idxSet.has(i) ? '*' : ' '}) `
+      const item = items[i]
+      outputs.push(
+        idxOld === i
+          ? `${prefix}${cursorPrinter.memo.join('')}${item}${UNICODES.ANSI_ESCAPE.TEXT.RESET}`
+          : idxSet.has(i)
+            ? `${prefix}${selectPrinter.memo.join('')}${item}${UNICODES.ANSI_ESCAPE.TEXT.RESET}`
+            : `${prefix}${unselectPrinter.memo.join('')}${item}${UNICODES.ANSI_ESCAPE.TEXT.RESET}`,
+      )
+    }
+    this.stdio.print(outputs.join('\n'))
+
+    const {
+      finish,
+      idx: idxNew,
+      idxSet: idxSetNew,
+    } = await this.stdio.multipleSelect(idxOld, idxSet)
+    const idx = (items.length + idxNew) % items.length
+
+    if (!finish) {
+      this.Cursor.ups(
+        items.length - 1,
+      ).Cursor.FirstColumn.Cursor.RemoveAfter.print()
+
+      return await this._multipleSelect(
+        items,
+        {
+          idx,
+          cursorPrinter,
+          selectPrinter,
+          unselectPrinter,
+        },
+        idxSetNew,
+      )
+    }
+    this.flush()
+    return Array.from(idxSetNew).map((i) => items[i])
   }
 
   async multipleSelect(
     items: string[],
-    selectOption: {
+    multipleSelectOption: {
       idx?: number
-      ansiBuilder?: AnsiBuilder
-      selectedAnsiBuilder?: AnsiBuilder
+      cursorPrinter?: SkyCliHelper
+      selectPrinter?: SkyCliHelper
+      unselectPrinter?: SkyCliHelper
     } = {},
     idxSet = new Set<number>(),
   ) {
-    const idx = typeof selectOption.idx === 'undefined' ? 0 : selectOption.idx
-    const ansiBuilder =
-      typeof selectOption.ansiBuilder === 'undefined'
-        ? SkyCliHelper.AnsiBuilder
-        : selectOption.ansiBuilder
-    const selectedAnsiBuilder =
-      typeof selectOption.selectedAnsiBuilder === 'undefined'
-        ? SkyCliHelper.AnsiBuilder
-        : selectOption.selectedAnsiBuilder
-    const prettyItems = []
-    for (let i = 0; i < items.length; i += 1) {
-      const item = [idxSet.has(i) ? '(*)' : '( )', items[i]].join(' ')
-      prettyItems.push(
-        i === idx
-          ? selectedAnsiBuilder.message(item)
-          : ansiBuilder.message(item),
+    const skyCliHelper = new SkyCliHelper()
+    skyCliHelper.Cursor.Hide.print()
+    try {
+      const result = await this._multipleSelect(
+        items,
+        multipleSelectOption,
+        idxSet,
       )
+      return result
+    } catch (err) {
+      skyCliHelper.Text.Foreground.Red.println(
+        err instanceof Error ? err.message : String(err),
+      )
+      process.exit(1)
+    } finally {
+      skyCliHelper.Cursor.Show.print()
     }
+  }
 
-    const seperator = '\n'
-    this.RemoveAfterCursor.print(
-      `${prettyItems.join(seperator)}`,
-    ).HideCursor.stdin.setRawMode(true)
-    return await new Promise<string[]>((resolve) => {
-      this.stdin
-        .once('data', (data) => {
-          this.stdin.setRawMode(false)
-          const key = data.toString('utf-8')
-          if (key === Unicode.Enter) {
-            this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active)
-            resolve(Array.from(idxSet).map((i) => items[i]))
-            return
-          }
-
-          if (key === Unicode.Exit) {
-            this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active)
-            return process.exit(1)
-          }
-
-          this.moveUp(items.length - 1).Home.stdin.pause()
-          let newIdx = idx
-          if (key === Unicode.Up) {
-            newIdx = (items.length + idx - 1) % items.length
-          }
-          if (key === Unicode.Down) {
-            newIdx = (idx + 1) % items.length
-          }
-          if (key === Unicode.Space) {
-            idxSet.has(idx) ? idxSet.delete(idx) : idxSet.add(idx)
-          }
-          resolve(
-            this.multipleSelect(
-              items,
-              {
-                idx: newIdx,
-                ansiBuilder,
-                selectedAnsiBuilder,
-              },
-              idxSet,
-            ),
-          )
-        })
-        .resume()
-    })
+  static async multipleSelect(
+    items: string[],
+    multipleSelectOption: {
+      idx?: number
+      cursorPrinter?: SkyCliHelper
+      selectPrinter?: SkyCliHelper
+      unselectPrinter?: SkyCliHelper
+    } = {},
+    idxSet = new Set<number>(),
+  ) {
+    return await new SkyCliHelper().multipleSelect(
+      items,
+      multipleSelectOption,
+      idxSet,
+    )
   }
 }
 
-if (require.main === module) {
-  main().catch(console.error)
-}
+main().catch(console.error)
 async function main() {
-  const answer = await SkyCliHelper.print(
-    SkyCliHelper.AnsiBuilder.Fg.rgb(130, 0, 0).message('test: '),
-  ).input(SkyCliHelper.AnsiBuilder.Fg.Yellow)
-  SkyCliHelper.println(`answer is ${answer}`).println()
+  SkyCliHelper.Text.Bold.println('test')
 
-  const answer2 = await SkyCliHelper.print('test2: ').select(['yes', 'no'], {
-    ansiBuilder: SkyCliHelper.AnsiBuilder.Fg.Gray,
-    selectedAnsiBuilder: SkyCliHelper.AnsiBuilder.Fg.Cyan,
-  })
-  SkyCliHelper.println(`answer2 is ${answer2}`).println()
+  SkyCliHelper.Text.Foreground.Red.print('test2: ')
+  const answer1 = await SkyCliHelper.input(SkyCliHelper.Text.Foreground.Yellow)
+  SkyCliHelper.println()
+  SkyCliHelper.Text.Italic.Text.Background.White.Text.Foreground.Pink.println(
+    answer1,
+  )
 
-  const answer3 = await SkyCliHelper.println('test3').select(['yes', 'no'], {
-    vertical: true,
-    ansiBuilder: SkyCliHelper.AnsiBuilder.Fg.Gray,
-    selectedAnsiBuilder: SkyCliHelper.AnsiBuilder.Bg.White,
-  })
-  SkyCliHelper.println(`answer3 is ${answer3}`).println()
+  SkyCliHelper.Text.Foreground.Green.print('test3: ')
 
-  const answer4 = await SkyCliHelper.println(
-    'test4 (space: select(*) / enter: finish)',
-  ).multipleSelect(['c', 'c++', 'java', 'python'], {
-    ansiBuilder: SkyCliHelper.AnsiBuilder.Fg.White.Italic,
-    selectedAnsiBuilder: SkyCliHelper.AnsiBuilder.Fg.Blue.Bold.Underline,
+  const answer2 = await SkyCliHelper.select(['Yes', 'No'], {
+    selectPrinter: SkyCliHelper.Text.Foreground.Cyan.Text.Underline,
+    unselectPrinter: SkyCliHelper.Text.Foreground.Gray,
   })
-  SkyCliHelper.println(`answer4 are [${answer4.join(',')}]`).println()
+  SkyCliHelper.println()
+  SkyCliHelper.println(answer2)
+
+  SkyCliHelper.Text.Foreground.Pink.println('test4')
+  const answer3 = await SkyCliHelper.multipleSelect(
+    ['java', 'nodejs', 'python'],
+    {
+      cursorPrinter: SkyCliHelper.Text.Foreground.Yellow,
+    },
+  )
+  SkyCliHelper.println()
+  SkyCliHelper.println(`[${answer3.join(', ')}]`)
 }

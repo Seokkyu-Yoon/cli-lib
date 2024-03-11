@@ -9,229 +9,336 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ansi_1 = require("./ansi");
+const stdio_1 = require("./stdio");
+const unicode_1 = require("./unicode");
 class SkyCliHelper {
-    static get AnsiBuilder() {
-        return ansi_1.AnsiBuilder.New;
-    }
     constructor() {
-        this.stdin = process.stdin;
-        this.stdout = process.stdout;
-        this.stdin.pause();
+        this.stdio = stdio_1.Stdio.instance;
+        this.memo = [];
+        this.Text = ((ctx) => {
+            const textUnicodes = unicode_1.UNICODES.ANSI_ESCAPE.TEXT;
+            return new (class {
+                get Reset() {
+                    return ctx.push(textUnicodes.RESET);
+                }
+                get Bold() {
+                    return ctx.push(textUnicodes.BOLD);
+                }
+                get Italic() {
+                    return ctx.push(textUnicodes.ITALIC);
+                }
+                get Underline() {
+                    return ctx.push(textUnicodes.UNDERLINE);
+                }
+                get Foreground() {
+                    const foregroundUnicodes = textUnicodes.FOREGROUND;
+                    return new (class {
+                        get Red() {
+                            return ctx.push(foregroundUnicodes.RED);
+                        }
+                        get Green() {
+                            return ctx.push(foregroundUnicodes.GREEN);
+                        }
+                        get Blue() {
+                            return ctx.push(foregroundUnicodes.BLUE);
+                        }
+                        get Pink() {
+                            return ctx.push(foregroundUnicodes.PINK);
+                        }
+                        get Cyan() {
+                            return ctx.push(foregroundUnicodes.CYAN);
+                        }
+                        get Yellow() {
+                            return ctx.push(foregroundUnicodes.YELLOW);
+                        }
+                        get White() {
+                            return ctx.push(foregroundUnicodes.WHITE);
+                        }
+                        get Gray() {
+                            return ctx.push(foregroundUnicodes.GRAY);
+                        }
+                        get Rgb() {
+                            return new (class {
+                                decimal(red, green, blue) {
+                                    return ctx.push(foregroundUnicodes.RGB.decimal(red, green, blue));
+                                }
+                                hex(hex) {
+                                    return ctx.push(foregroundUnicodes.RGB.hex(hex));
+                                }
+                            })();
+                        }
+                    })();
+                }
+                get Background() {
+                    const backgroundUnicodes = textUnicodes.BACKGROUND;
+                    return new (class {
+                        get Red() {
+                            return ctx.push(backgroundUnicodes.RED);
+                        }
+                        get Green() {
+                            return ctx.push(backgroundUnicodes.GREEN);
+                        }
+                        get Blue() {
+                            return ctx.push(backgroundUnicodes.BLUE);
+                        }
+                        get Pink() {
+                            return ctx.push(backgroundUnicodes.PINK);
+                        }
+                        get Cyan() {
+                            return ctx.push(backgroundUnicodes.CYAN);
+                        }
+                        get Yellow() {
+                            return ctx.push(backgroundUnicodes.YELLOW);
+                        }
+                        get White() {
+                            return ctx.push(backgroundUnicodes.WHITE);
+                        }
+                        get Gray() {
+                            return ctx.push(backgroundUnicodes.GRAY);
+                        }
+                        get Rgb() {
+                            return new (class {
+                                decimal(red, green, blue) {
+                                    return ctx.push(backgroundUnicodes.RGB.decimal(red, green, blue));
+                                }
+                                hex(hex) {
+                                    return ctx.push(backgroundUnicodes.RGB.hex(hex));
+                                }
+                            })();
+                        }
+                    })();
+                }
+            })();
+        })(this);
+        this.Cursor = ((ctx) => {
+            const cursorUnicodes = unicode_1.UNICODES.ANSI_ESCAPE.CURSOR;
+            return new (class {
+                get Up() {
+                    return ctx.push(cursorUnicodes.UP);
+                }
+                get Down() {
+                    return ctx.push(cursorUnicodes.DOWN);
+                }
+                get Right() {
+                    return ctx.push(cursorUnicodes.RIGHT);
+                }
+                get Left() {
+                    return ctx.push(cursorUnicodes.LEFT);
+                }
+                get FirstColumn() {
+                    return ctx.push(cursorUnicodes.FIRST_COLUMN);
+                }
+                get Hide() {
+                    return ctx.push(cursorUnicodes.HIDE);
+                }
+                get Show() {
+                    return ctx.push(cursorUnicodes.SHOW);
+                }
+                get RemoveAfter() {
+                    return ctx.push(cursorUnicodes.REMOVE_AFTER);
+                }
+                ups(n) {
+                    return ctx.push(cursorUnicodes.ups(n));
+                }
+                downs(n) {
+                    return ctx.push(cursorUnicodes.downs(n));
+                }
+                rights(n) {
+                    return ctx.push(cursorUnicodes.rights(n));
+                }
+                lefts(n) {
+                    return ctx.push(cursorUnicodes.lefts(n));
+                }
+            })();
+        })(this);
     }
-    print(text) {
-        this.stdout.write(text);
+    push(...args) {
+        this.memo.push(...args);
         return this;
     }
-    static print(text) {
-        return new SkyCliHelper().print(text);
+    static get Text() {
+        return new SkyCliHelper().Text;
     }
-    println(text) {
-        return this.print(typeof text === 'undefined' ? '\n' : `${text}\n`);
+    static get Cursor() {
+        return new SkyCliHelper().Cursor;
     }
-    static println(text) {
-        return new SkyCliHelper().println(text);
+    flush() {
+        this.memo = [];
+        return this;
     }
-    get HideCursor() {
-        return this.print(ansi_1.Unicode.HideCursor);
+    print(...text) {
+        this.stdio.print(...this.memo, ...text, unicode_1.UNICODES.ANSI_ESCAPE.TEXT.RESET);
+        this.flush();
     }
-    get ShowCursor() {
-        return this.print(ansi_1.Unicode.ShowCursor);
+    static print(...text) {
+        new SkyCliHelper().print(...text);
     }
-    get SaveCursorPosition() {
-        return this.print(ansi_1.Unicode.SaveCursorPosition);
+    println(...text) {
+        this.stdio.println(...this.memo, ...text, unicode_1.UNICODES.ANSI_ESCAPE.TEXT.RESET);
+        this.flush();
     }
-    get RestoreCursorPosition() {
-        return this.print(ansi_1.Unicode.RestoreCursorPosition);
+    static println(...text) {
+        new SkyCliHelper().println(...text);
     }
-    get RemoveAfterCursor() {
-        return this.print(ansi_1.Unicode.RemoveAfterCursor);
-    }
-    moveUp(n) {
-        return this.print(ansi_1.Unicode.Ups(n));
-    }
-    moveDown(n) {
-        return this.print(ansi_1.Unicode.Downs(n));
-    }
-    moveLeft(n) {
-        return this.print(ansi_1.Unicode.Lefts(n));
-    }
-    moveRight(n) {
-        return this.print(ansi_1.Unicode.Rights(n));
-    }
-    get Home() {
-        return this.print(ansi_1.Unicode.Home);
-    }
-    input(ansiBuilder) {
+    input(inputPrinter) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof ansiBuilder !== 'undefined') {
-                this.print(ansiBuilder.Active);
+            if (typeof inputPrinter !== 'undefined') {
+                this.stdio.print(inputPrinter.memo.join(''));
             }
-            return yield new Promise((resolve) => {
-                this.stdin
-                    .once('data', (data) => {
-                    this.stdin.pause();
-                    this.print(SkyCliHelper.AnsiBuilder.Reset.Active);
-                    resolve(data.toString('utf-8').trim());
-                })
-                    .resume();
-            });
+            const result = yield this.stdio.input();
+            this.Text.Reset.print();
+            return result;
         });
     }
-    static input(ansiBuilder) {
+    static input(inputPrinter) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield new SkyCliHelper().input(ansiBuilder);
+            return yield new SkyCliHelper().input(inputPrinter);
         });
     }
-    select(items, selectOption = {}) {
+    _select(items, options = {}) {
         return __awaiter(this, void 0, void 0, function* () {
-            const idx = typeof selectOption.idx === 'undefined' ? 0 : selectOption.idx;
-            const vertical = typeof selectOption.vertical === 'undefined'
-                ? false
-                : selectOption.vertical;
-            const ansiBuilder = typeof selectOption.ansiBuilder === 'undefined'
-                ? SkyCliHelper.AnsiBuilder
-                : selectOption.ansiBuilder;
-            const selectedAnsiBuilder = typeof selectOption.selectedAnsiBuilder === 'undefined'
-                ? SkyCliHelper.AnsiBuilder
-                : selectOption.selectedAnsiBuilder;
-            const prettyItems = [];
+            const idxOld = typeof options.idx === 'undefined' ? 0 : options.idx;
+            const vertical = typeof options.vertical === 'undefined' ? false : options.vertical;
+            const selectPrinter = typeof options.selectPrinter === 'undefined'
+                ? new SkyCliHelper()
+                : options.selectPrinter;
+            const unselectPrinter = typeof options.unselectPrinter === 'undefined'
+                ? new SkyCliHelper()
+                : options.unselectPrinter;
+            const outputs = [];
             for (let i = 0; i < items.length; i += 1) {
                 const item = vertical ? `${i + 1}. ${items[i]}` : items[i];
-                if (i === idx) {
-                    prettyItems.push(selectedAnsiBuilder.message(item));
-                    continue;
+                outputs.push(idxOld === i
+                    ? `${selectPrinter.memo.join('')}${item}${unicode_1.UNICODES.ANSI_ESCAPE.TEXT.RESET}`
+                    : `${unselectPrinter.memo.join('')}${item}${unicode_1.UNICODES.ANSI_ESCAPE.TEXT.RESET}`);
+            }
+            this.stdio.print(outputs.join(vertical ? '\n' : ' / '));
+            const { finish, idx: idxNew } = yield this.stdio.select(vertical, idxOld);
+            const idx = (items.length + idxNew) % items.length;
+            if (!finish) {
+                if (vertical) {
+                    this.Cursor.ups(items.length - 1).Cursor.FirstColumn.Cursor.RemoveAfter.print();
                 }
-                prettyItems.push(ansiBuilder.message(item));
+                else {
+                    this.Cursor.lefts(items.join(' / ').length).Cursor.RemoveAfter.print();
+                }
+                return yield this._select(items, {
+                    idx,
+                    vertical,
+                    selectPrinter,
+                    unselectPrinter,
+                });
             }
-            const seperator = vertical ? '\n' : ' / ';
-            this.RemoveAfterCursor.print(`${prettyItems.join(seperator)}`).HideCursor.stdin.setRawMode(true);
-            return yield new Promise((resolve) => {
-                this.stdin
-                    .once('data', (data) => {
-                    this.stdin.setRawMode(false);
-                    const key = data.toString('utf-8');
-                    if (key === ansi_1.Unicode.Enter) {
-                        this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active);
-                        resolve(items[idx]);
-                        return;
-                    }
-                    if (key === ansi_1.Unicode.Exit) {
-                        this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active);
-                        return process.exit(1);
-                    }
-                    if (vertical) {
-                        this.moveUp(items.length - 1).Home.stdin.pause();
-                    }
-                    else {
-                        this.moveLeft(items.join(' / ').length).stdin.pause();
-                    }
-                    let newIdx = idx;
-                    if (key === ansi_1.Unicode.Left) {
-                        newIdx = vertical ? newIdx : (items.length + idx - 1) % items.length;
-                    }
-                    if (key === ansi_1.Unicode.Right) {
-                        newIdx = vertical ? newIdx : (idx + 1) % items.length;
-                    }
-                    if (key === ansi_1.Unicode.Up) {
-                        newIdx = vertical ? (items.length + idx - 1) % items.length : newIdx;
-                    }
-                    if (key === ansi_1.Unicode.Down) {
-                        newIdx = vertical ? (idx + 1) % items.length : newIdx;
-                    }
-                    resolve(this.select(items, {
-                        idx: newIdx,
-                        vertical,
-                        ansiBuilder,
-                        selectedAnsiBuilder,
-                    }));
-                })
-                    .resume();
-            });
+            this.flush();
+            return items[idx];
         });
     }
-    static select(items, selectOption = {}) {
+    select(items, options = {}) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield new SkyCliHelper().select(items, selectOption);
+            const skyCliHelper = new SkyCliHelper();
+            skyCliHelper.Cursor.Hide.print();
+            try {
+                const result = yield this._select(items, options);
+                return result;
+            }
+            catch (err) {
+                skyCliHelper.Text.Foreground.Red.println(err instanceof Error ? err.message : String(err));
+                process.exit(1);
+            }
+            finally {
+                skyCliHelper.Cursor.Show.print();
+            }
         });
     }
-    multipleSelect(items, selectOption = {}, idxSet = new Set()) {
+    static select(items, options = {}) {
         return __awaiter(this, void 0, void 0, function* () {
-            const idx = typeof selectOption.idx === 'undefined' ? 0 : selectOption.idx;
-            const ansiBuilder = typeof selectOption.ansiBuilder === 'undefined'
-                ? SkyCliHelper.AnsiBuilder
-                : selectOption.ansiBuilder;
-            const selectedAnsiBuilder = typeof selectOption.selectedAnsiBuilder === 'undefined'
-                ? SkyCliHelper.AnsiBuilder
-                : selectOption.selectedAnsiBuilder;
-            const prettyItems = [];
+            return yield new SkyCliHelper().select(items, options);
+        });
+    }
+    _multipleSelect(items, multipleSelectOption = {}, idxSet = new Set()) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const idxOld = typeof multipleSelectOption.idx === 'undefined'
+                ? 0
+                : multipleSelectOption.idx;
+            const cursorPrinter = typeof multipleSelectOption.cursorPrinter === 'undefined'
+                ? new SkyCliHelper()
+                : multipleSelectOption.cursorPrinter;
+            const selectPrinter = typeof multipleSelectOption.selectPrinter === 'undefined'
+                ? new SkyCliHelper()
+                : multipleSelectOption.selectPrinter;
+            const unselectPrinter = typeof multipleSelectOption.unselectPrinter === 'undefined'
+                ? new SkyCliHelper()
+                : multipleSelectOption.unselectPrinter;
+            const outputs = [];
             for (let i = 0; i < items.length; i += 1) {
-                const item = [idxSet.has(i) ? '(*)' : '( )', items[i]].join(' ');
-                prettyItems.push(i === idx
-                    ? selectedAnsiBuilder.message(item)
-                    : ansiBuilder.message(item));
+                const prefix = `(${idxSet.has(i) ? '*' : ' '}) `;
+                const item = items[i];
+                outputs.push(idxOld === i
+                    ? `${prefix}${cursorPrinter.memo.join('')}${item}${unicode_1.UNICODES.ANSI_ESCAPE.TEXT.RESET}`
+                    : idxSet.has(i)
+                        ? `${prefix}${selectPrinter.memo.join('')}${item}${unicode_1.UNICODES.ANSI_ESCAPE.TEXT.RESET}`
+                        : `${prefix}${unselectPrinter.memo.join('')}${item}${unicode_1.UNICODES.ANSI_ESCAPE.TEXT.RESET}`);
             }
-            const seperator = '\n';
-            this.RemoveAfterCursor.print(`${prettyItems.join(seperator)}`).HideCursor.stdin.setRawMode(true);
-            return yield new Promise((resolve) => {
-                this.stdin
-                    .once('data', (data) => {
-                    this.stdin.setRawMode(false);
-                    const key = data.toString('utf-8');
-                    if (key === ansi_1.Unicode.Enter) {
-                        this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active);
-                        resolve(Array.from(idxSet).map((i) => items[i]));
-                        return;
-                    }
-                    if (key === ansi_1.Unicode.Exit) {
-                        this.ShowCursor.println(SkyCliHelper.AnsiBuilder.Reset.Active);
-                        return process.exit(1);
-                    }
-                    this.moveUp(items.length - 1).Home.stdin.pause();
-                    let newIdx = idx;
-                    if (key === ansi_1.Unicode.Up) {
-                        newIdx = (items.length + idx - 1) % items.length;
-                    }
-                    if (key === ansi_1.Unicode.Down) {
-                        newIdx = (idx + 1) % items.length;
-                    }
-                    if (key === ansi_1.Unicode.Space) {
-                        idxSet.has(idx) ? idxSet.delete(idx) : idxSet.add(idx);
-                    }
-                    resolve(this.multipleSelect(items, {
-                        idx: newIdx,
-                        ansiBuilder,
-                        selectedAnsiBuilder,
-                    }, idxSet));
-                })
-                    .resume();
-            });
+            this.stdio.print(outputs.join('\n'));
+            const { finish, idx: idxNew, idxSet: idxSetNew, } = yield this.stdio.multipleSelect(idxOld, idxSet);
+            const idx = (items.length + idxNew) % items.length;
+            if (!finish) {
+                this.Cursor.ups(items.length - 1).Cursor.FirstColumn.Cursor.RemoveAfter.print();
+                return yield this._multipleSelect(items, {
+                    idx,
+                    cursorPrinter,
+                    selectPrinter,
+                    unselectPrinter,
+                }, idxSetNew);
+            }
+            this.flush();
+            return Array.from(idxSetNew).map((i) => items[i]);
+        });
+    }
+    multipleSelect(items, multipleSelectOption = {}, idxSet = new Set()) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const skyCliHelper = new SkyCliHelper();
+            skyCliHelper.Cursor.Hide.print();
+            try {
+                const result = yield this._multipleSelect(items, multipleSelectOption, idxSet);
+                return result;
+            }
+            catch (err) {
+                skyCliHelper.Text.Foreground.Red.println(err instanceof Error ? err.message : String(err));
+                process.exit(1);
+            }
+            finally {
+                skyCliHelper.Cursor.Show.print();
+            }
+        });
+    }
+    static multipleSelect(items, multipleSelectOption = {}, idxSet = new Set()) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield new SkyCliHelper().multipleSelect(items, multipleSelectOption, idxSet);
         });
     }
 }
 exports.default = SkyCliHelper;
-if (require.main === module) {
-    main().catch(console.error);
-}
+main().catch(console.error);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const answer = yield SkyCliHelper.print(SkyCliHelper.AnsiBuilder.Fg.rgb(130, 0, 0).message('test: ')).input(SkyCliHelper.AnsiBuilder.Fg.Yellow);
-        SkyCliHelper.println(`answer is ${answer}`).println();
-        const answer2 = yield SkyCliHelper.print('test2: ').select(['yes', 'no'], {
-            ansiBuilder: SkyCliHelper.AnsiBuilder.Fg.Gray,
-            selectedAnsiBuilder: SkyCliHelper.AnsiBuilder.Fg.Cyan,
+        SkyCliHelper.Text.Bold.println('test');
+        SkyCliHelper.Text.Foreground.Red.print('test2: ');
+        const answer1 = yield SkyCliHelper.input(SkyCliHelper.Text.Foreground.Yellow);
+        SkyCliHelper.println();
+        SkyCliHelper.Text.Italic.Text.Background.White.Text.Foreground.Pink.println(answer1);
+        SkyCliHelper.Text.Foreground.Green.print('test3: ');
+        const answer2 = yield SkyCliHelper.select(['Yes', 'No'], {
+            selectPrinter: SkyCliHelper.Text.Foreground.Cyan.Text.Underline,
+            unselectPrinter: SkyCliHelper.Text.Foreground.Gray,
         });
-        SkyCliHelper.println(`answer2 is ${answer2}`).println();
-        const answer3 = yield SkyCliHelper.println('test3').select(['yes', 'no'], {
-            vertical: true,
-            ansiBuilder: SkyCliHelper.AnsiBuilder.Fg.Gray,
-            selectedAnsiBuilder: SkyCliHelper.AnsiBuilder.Bg.White,
+        SkyCliHelper.println();
+        SkyCliHelper.println(answer2);
+        SkyCliHelper.Text.Foreground.Pink.println('test4');
+        const answer3 = yield SkyCliHelper.multipleSelect(['java', 'nodejs', 'python'], {
+            cursorPrinter: SkyCliHelper.Text.Foreground.Yellow,
         });
-        SkyCliHelper.println(`answer3 is ${answer3}`).println();
-        const answer4 = yield SkyCliHelper.println('test4 (space: select(*) / enter: finish)').multipleSelect(['c', 'c++', 'java', 'python'], {
-            ansiBuilder: SkyCliHelper.AnsiBuilder.Fg.White.Italic,
-            selectedAnsiBuilder: SkyCliHelper.AnsiBuilder.Fg.Blue.Bold.Underline,
-        });
-        SkyCliHelper.println(`answer4 are [${answer4.join(',')}]`).println();
+        SkyCliHelper.println();
+        SkyCliHelper.println(`[${answer3.join(', ')}]`);
     });
 }
