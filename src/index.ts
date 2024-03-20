@@ -475,7 +475,6 @@ async function main() {
     selectPrinter: SkyCliHelper.Text.Foreground.Cyan.Text.Underline,
     unselectPrinter: SkyCliHelper.Text.Foreground.Gray,
   })
-  SkyCliHelper.println()
   SkyCliHelper.println(answer2.item)
 
   SkyCliHelper.Text.Foreground.Pink.println('test4')
@@ -485,6 +484,5 @@ async function main() {
       cursorPrinter: SkyCliHelper.Text.Foreground.Yellow,
     },
   )
-  SkyCliHelper.println()
   SkyCliHelper.println(`[${answer3.map(({ item }) => item).join(', ')}]`)
 }
