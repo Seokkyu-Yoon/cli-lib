@@ -112,30 +112,45 @@ export default class SkyCliHelper {
         vertical?: boolean;
         selectPrinter?: SkyCliHelper;
         unselectPrinter?: SkyCliHelper;
-    }): Promise<string>;
+    }): Promise<{
+        idx: number;
+        item: string;
+    }>;
     static select(items: string[], options?: {
         idx?: number;
         vertical?: boolean;
         selectPrinter?: SkyCliHelper;
         unselectPrinter?: SkyCliHelper;
-    }): Promise<string>;
+    }): Promise<{
+        idx: number;
+        item: string;
+    }>;
     _multipleSelect(items: string[], multipleSelectOption?: {
         idx?: number;
         cursorPrinter?: SkyCliHelper;
         selectPrinter?: SkyCliHelper;
         unselectPrinter?: SkyCliHelper;
-    }, idxSet?: Set<number>): Promise<string[]>;
+    }, idxSet?: Set<number>): Promise<Array<{
+        idx: number;
+        item: string;
+    }>>;
     multipleSelect(items: string[], multipleSelectOption?: {
         idx?: number;
         cursorPrinter?: SkyCliHelper;
         selectPrinter?: SkyCliHelper;
         unselectPrinter?: SkyCliHelper;
-    }, idxSet?: Set<number>): Promise<string[]>;
+    }, idxSet?: Set<number>): Promise<{
+        idx: number;
+        item: string;
+    }[]>;
     static multipleSelect(items: string[], multipleSelectOption?: {
         idx?: number;
         cursorPrinter?: SkyCliHelper;
         selectPrinter?: SkyCliHelper;
         unselectPrinter?: SkyCliHelper;
-    }, idxSet?: Set<number>): Promise<string[]>;
+    }, idxSet?: Set<number>): Promise<{
+        idx: number;
+        item: string;
+    }[]>;
 }
 //# sourceMappingURL=index.d.ts.map

@@ -242,7 +242,10 @@ export default class SkyCliHelper {
       selectPrinter?: SkyCliHelper
       unselectPrinter?: SkyCliHelper
     } = {},
-  ): Promise<string> {
+  ): Promise<{
+    idx: number
+    item: string
+  }> {
     const idxOld = typeof options.idx === 'undefined' ? 0 : options.idx
     const vertical =
       typeof options.vertical === 'undefined' ? false : options.vertical
@@ -285,7 +288,11 @@ export default class SkyCliHelper {
       })
     }
     this.flush()
-    return items[idx]
+    this.stdio.println()
+    return {
+      idx,
+      item: items[idx],
+    }
   }
 
   async select(
@@ -296,7 +303,7 @@ export default class SkyCliHelper {
       selectPrinter?: SkyCliHelper
       unselectPrinter?: SkyCliHelper
     } = {},
-  ): Promise<string> {
+  ) {
     const skyCliHelper = new SkyCliHelper()
     skyCliHelper.Cursor.Hide.print()
     try {
@@ -333,7 +340,12 @@ export default class SkyCliHelper {
       unselectPrinter?: SkyCliHelper
     } = {},
     idxSet = new Set<number>(),
-  ): Promise<string[]> {
+  ): Promise<
+    Array<{
+      idx: number
+      item: string
+    }>
+  > {
     const idxOld =
       typeof multipleSelectOption.idx === 'undefined'
         ? 0
@@ -389,7 +401,11 @@ export default class SkyCliHelper {
       )
     }
     this.flush()
-    return Array.from(idxSetNew).map((i) => items[i])
+    this.stdio.println()
+    return Array.from(idxSetNew).map((idx) => ({
+      idx,
+      item: items[idx],
+    }))
   }
 
   async multipleSelect(
@@ -460,7 +476,7 @@ async function main() {
     unselectPrinter: SkyCliHelper.Text.Foreground.Gray,
   })
   SkyCliHelper.println()
-  SkyCliHelper.println(answer2)
+  SkyCliHelper.println(answer2.item)
 
   SkyCliHelper.Text.Foreground.Pink.println('test4')
   const answer3 = await SkyCliHelper.multipleSelect(
@@ -470,5 +486,5 @@ async function main() {
     },
   )
   SkyCliHelper.println()
-  SkyCliHelper.println(`[${answer3.join(', ')}]`)
+  SkyCliHelper.println(`[${answer3.map(({ item }) => item).join(', ')}]`)
 }

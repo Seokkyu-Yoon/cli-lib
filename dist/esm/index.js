@@ -231,7 +231,11 @@ export default class SkyCliHelper {
                 });
             }
             this.flush();
-            return items[idx];
+            this.stdio.println();
+            return {
+                idx,
+                item: items[idx],
+            };
         });
     }
     select(items, options = {}) {
@@ -293,7 +297,11 @@ export default class SkyCliHelper {
                 }, idxSetNew);
             }
             this.flush();
-            return Array.from(idxSetNew).map((i) => items[i]);
+            this.stdio.println();
+            return Array.from(idxSetNew).map((idx) => ({
+                idx,
+                item: items[idx],
+            }));
         });
     }
     multipleSelect(items, multipleSelectOption = {}, idxSet = new Set()) {
@@ -335,12 +343,12 @@ function main() {
             unselectPrinter: SkyCliHelper.Text.Foreground.Gray,
         });
         SkyCliHelper.println();
-        SkyCliHelper.println(answer2);
+        SkyCliHelper.println(answer2.item);
         SkyCliHelper.Text.Foreground.Pink.println('test4');
         const answer3 = yield SkyCliHelper.multipleSelect(['java', 'nodejs', 'python'], {
             cursorPrinter: SkyCliHelper.Text.Foreground.Yellow,
         });
         SkyCliHelper.println();
-        SkyCliHelper.println(`[${answer3.join(', ')}]`);
+        SkyCliHelper.println(`[${answer3.map(({ item }) => item).join(', ')}]`);
     });
 }
