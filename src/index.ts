@@ -308,14 +308,14 @@ export default class SkyCliHelper {
     skyCliHelper.Cursor.Hide.print()
     try {
       const result = await this._select(items, options)
+      skyCliHelper.Cursor.Show.print()
       return result
     } catch (err) {
       skyCliHelper.Text.Foreground.Red.println(
         err instanceof Error ? err.message : String(err),
       )
-      process.exit(1)
-    } finally {
       skyCliHelper.Cursor.Show.print()
+      process.exit(1)
     }
   }
 
@@ -426,14 +426,14 @@ export default class SkyCliHelper {
         multipleSelectOption,
         idxSet,
       )
+      skyCliHelper.Cursor.Show.print()
       return result
     } catch (err) {
       skyCliHelper.Text.Foreground.Red.println(
         err instanceof Error ? err.message : String(err),
       )
-      process.exit(1)
-    } finally {
       skyCliHelper.Cursor.Show.print()
+      process.exit(1)
     }
   }
 

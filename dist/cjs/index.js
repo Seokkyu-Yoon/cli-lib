@@ -246,14 +246,13 @@ class SkyCliHelper {
             skyCliHelper.Cursor.Hide.print();
             try {
                 const result = yield this._select(items, options);
+                skyCliHelper.Cursor.Show.print();
                 return result;
             }
             catch (err) {
                 skyCliHelper.Text.Foreground.Red.println(err instanceof Error ? err.message : String(err));
-                process.exit(1);
-            }
-            finally {
                 skyCliHelper.Cursor.Show.print();
+                process.exit(1);
             }
         });
     }
@@ -312,14 +311,13 @@ class SkyCliHelper {
             skyCliHelper.Cursor.Hide.print();
             try {
                 const result = yield this._multipleSelect(items, multipleSelectOption, idxSet);
+                skyCliHelper.Cursor.Show.print();
                 return result;
             }
             catch (err) {
                 skyCliHelper.Text.Foreground.Red.println(err instanceof Error ? err.message : String(err));
-                process.exit(1);
-            }
-            finally {
                 skyCliHelper.Cursor.Show.print();
+                process.exit(1);
             }
         });
     }
@@ -345,13 +343,11 @@ function main() {
             selectPrinter: SkyCliHelper.Text.Foreground.Cyan.Text.Underline,
             unselectPrinter: SkyCliHelper.Text.Foreground.Gray,
         });
-        SkyCliHelper.println();
         SkyCliHelper.println(answer2.item);
         SkyCliHelper.Text.Foreground.Pink.println('test4');
         const answer3 = yield SkyCliHelper.multipleSelect(['java', 'nodejs', 'python'], {
             cursorPrinter: SkyCliHelper.Text.Foreground.Yellow,
         });
-        SkyCliHelper.println();
         SkyCliHelper.println(`[${answer3.map(({ item }) => item).join(', ')}]`);
     });
 }
